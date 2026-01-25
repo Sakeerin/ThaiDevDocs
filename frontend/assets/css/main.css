@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    @apply bg-white text-gray-900;
+    @apply dark:bg-gray-950 dark:text-gray-100;
+  }
+
+  /* Thai typography adjustments */
+  p, li, dd {
+    @apply leading-relaxed;
+  }
+
+  /* Code block styling */
+  pre {
+    @apply rounded-lg overflow-x-auto;
+  }
+
+  pre code {
+    @apply font-mono text-sm;
+  }
+
+  /* Selection styling */
+  ::selection {
+    @apply bg-primary-200 dark:bg-primary-800;
+  }
+}
+
+@layer components {
+  /* Custom button styles */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium;
+    @apply transition-all duration-200 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white;
+    @apply hover:bg-primary-700;
+    @apply focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-700;
+    @apply hover:bg-gray-200;
+    @apply dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700;
+    @apply focus:ring-gray-500;
+  }
+
+  .btn-outline {
+    @apply btn border-2 border-primary-600 text-primary-600;
+    @apply hover:bg-primary-50;
+    @apply dark:border-primary-400 dark:text-primary-400 dark:hover:bg-primary-900/20;
+    @apply focus:ring-primary-500;
+  }
+
+  /* Card component */
+  .card {
+    @apply bg-white dark:bg-gray-900 rounded-xl shadow-sm;
+    @apply border border-gray-200 dark:border-gray-800;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-4 py-2 rounded-lg border;
+    @apply bg-white dark:bg-gray-900;
+    @apply border-gray-300 dark:border-gray-700;
+    @apply text-gray-900 dark:text-gray-100;
+    @apply placeholder-gray-400 dark:placeholder-gray-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-primary-100 text-primary-800;
+    @apply dark:bg-primary-900/30 dark:text-primary-300;
+  }
+
+  .badge-success {
+    @apply badge bg-success-50 text-success-600;
+    @apply dark:bg-success-900/30 dark:text-success-500;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning-50 text-warning-600;
+    @apply dark:bg-warning-900/30 dark:text-warning-500;
+  }
+
+  /* Difficulty badges */
+  .difficulty-beginner {
+    @apply badge bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+  }
+
+  .difficulty-intermediate {
+    @apply badge bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+  }
+
+  .difficulty-advanced {
+    @apply badge bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+  }
+
+  /* Custom block styles for documentation */
+  .custom-block {
+    @apply my-4 p-4 rounded-lg border-l-4;
+  }
+
+  .custom-block.tip {
+    @apply bg-green-50 border-green-500 dark:bg-green-900/20;
+  }
+
+  .custom-block.warning {
+    @apply bg-yellow-50 border-yellow-500 dark:bg-yellow-900/20;
+  }
+
+  .custom-block.danger {
+    @apply bg-red-50 border-red-500 dark:bg-red-900/20;
+  }
+
+  .custom-block.info {
+    @apply bg-blue-50 border-blue-500 dark:bg-blue-900/20;
+  }
+
+  .custom-block-title {
+    @apply font-semibold mb-2;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.300') transparent;
+  }
+
+  .dark .scrollbar-custom {
+    scrollbar-color: theme('colors.gray.600') transparent;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
+  }
+}
+
+/* Code syntax highlighting - Atom One Dark inspired */
+.hljs {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.hljs-comment,
+.hljs-quote {
+  @apply text-gray-500 italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag {
+  @apply text-purple-400;
+}
+
+.hljs-string,
+.hljs-addition {
+  @apply text-green-400;
+}
+
+.hljs-number,
+.hljs-literal {
+  @apply text-orange-400;
+}
+
+.hljs-function,
+.hljs-title {
+  @apply text-blue-400;
+}
+
+.hljs-variable,
+.hljs-template-variable {
+  @apply text-red-400;
+}
+
+.hljs-type,
+.hljs-class,
+.hljs-built_in {
+  @apply text-yellow-400;
+}
+
+.hljs-attr,
+.hljs-attribute {
+  @apply text-cyan-400;
+}
+
+.hljs-deletion {
+  @apply text-red-500;
+}
