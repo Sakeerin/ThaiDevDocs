@@ -27,6 +27,10 @@ use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\Admin\MediaController as AdminMediaController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\AnalyticsController as AdminAnalyticsController;
+use App\Http\Controllers\Admin\LearningPathController as AdminLearningPathController;
+use App\Http\Controllers\Admin\EditSuggestionController as AdminEditSuggestionController;
+use App\Http\Controllers\Admin\ContributionController as AdminContributionController;
+use App\Http\Controllers\Admin\GlossaryController as AdminGlossaryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -176,6 +180,9 @@ Route::prefix('v1')->group(function () {
         Route::delete('articles/{id}', [AdminArticleController::class, 'destroy']);
         Route::patch('articles/{id}/status', [AdminArticleController::class, 'updateStatus']);
         Route::patch('articles/{id}/publish', [AdminArticleController::class, 'publish']);
+        Route::patch('articles/{id}/schedule', [AdminArticleController::class, 'schedulePublish']);
+        Route::post('articles/bulk', [AdminArticleController::class, 'bulkAction']);
+        Route::get('articles/{id}/revisions', [AdminArticleController::class, 'revisions']);
         Route::post('articles/{id}/duplicate', [AdminArticleController::class, 'duplicate']);
 
         // Categories Management
@@ -231,6 +238,33 @@ Route::prefix('v1')->group(function () {
         Route::get('analytics/articles', [AdminAnalyticsController::class, 'articles']);
         Route::get('analytics/search', [AdminAnalyticsController::class, 'search']);
         Route::get('analytics/users', [AdminAnalyticsController::class, 'users']);
+
+        // Learning Paths
+        Route::get('learning-paths', [AdminLearningPathController::class, 'index']);
+        Route::post('learning-paths', [AdminLearningPathController::class, 'store']);
+        Route::get('learning-paths/{id}', [AdminLearningPathController::class, 'show']);
+        Route::put('learning-paths/{id}', [AdminLearningPathController::class, 'update']);
+        Route::delete('learning-paths/{id}', [AdminLearningPathController::class, 'destroy']);
+        Route::patch('learning-paths/{id}/publish', [AdminLearningPathController::class, 'publish']);
+
+        // Edit Suggestions
+        Route::get('edit-suggestions', [AdminEditSuggestionController::class, 'index']);
+        Route::get('edit-suggestions/pending', [AdminEditSuggestionController::class, 'pending']);
+        Route::get('edit-suggestions/{id}', [AdminEditSuggestionController::class, 'show']);
+        Route::patch('edit-suggestions/{id}', [AdminEditSuggestionController::class, 'review']);
+
+        // Contributions
+        Route::get('contributions', [AdminContributionController::class, 'index']);
+        Route::get('contributions/pending', [AdminContributionController::class, 'pending']);
+        Route::patch('contributions/{id}/review', [AdminContributionController::class, 'review']);
+
+        // Glossary
+        Route::get('glossary', [AdminGlossaryController::class, 'index']);
+        Route::post('glossary', [AdminGlossaryController::class, 'store']);
+        Route::get('glossary/{id}', [AdminGlossaryController::class, 'show']);
+        Route::put('glossary/{id}', [AdminGlossaryController::class, 'update']);
+        Route::delete('glossary/{id}', [AdminGlossaryController::class, 'destroy']);
+        Route::patch('glossary/{id}/approve', [AdminGlossaryController::class, 'approve']);
 
     });
 

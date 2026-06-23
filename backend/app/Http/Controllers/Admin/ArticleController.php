@@ -376,6 +376,101 @@ class ArticleController extends Controller
     }
 
     /**
+     * Bulk actions on articles.
+     */
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:articles,id'],
+            'action' => ['required', 'in:publish,archive,delete,draft,pending_review'],
+        ]);
+
+        $articles = Article::whereIn('id', $validated['ids'])->get();
+        $count = 0;
+
+        foreach ($articles as $article) {
+            match ($validated['action']) {
+                'publish' => $article->update([
+                    'status' => 'published',
+                    'published_at' => $article->published_at ?? now(),
+                    'reviewer_id' => $request->user()->id,
+                    'last_reviewed_at' => now(),
+                ]),
+                'archive' => $article->update(['status' => 'archived']),
+                'draft' => $article->update(['status' => 'draft']),
+                'pending_review' => $article->update(['status' => 'pending_review']),
+                'delete' => $article->delete(),
+            };
+            $count++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Bulk action applied to {$count} article(s).",
+            'data' => ['count' => $count],
+        ]);
+    }
+
+    /**
+     * Schedule article publish date.
+     */
+    public function schedulePublish(Request $request, int $id): JsonResponse
+    {
+        $article = Article::find($id);
+
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'error' => ['code' => 'NOT_FOUND', 'message' => 'Article not found.'],
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'published_at' => ['required', 'date', 'after:now'],
+        ]);
+
+        $article->update([
+            'published_at' => $validated['published_at'],
+            'status' => 'pending_review',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'published_at' => $article->published_at?->toISOString(),
+                'status' => $article->status,
+            ],
+            'message' => 'Publish schedule saved.',
+        ]);
+    }
+
+    /**
+     * Get article revision history.
+     */
+    public function revisions(int $id): JsonResponse
+    {
+        $article = Article::find($id);
+
+        if (!$article) {
+            return response()->json([
+                'success' => false,
+                'error' => ['code' => 'NOT_FOUND', 'message' => 'Article not found.'],
+            ], 404);
+        }
+
+        $revisions = $article->revisions()
+            ->with('user:id,name,avatar')
+            ->orderByDesc('version')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $revisions,
+        ]);
+    }
+
+    /**
      * Render markdown to HTML.
      */
     protected function renderMarkdown(string $markdown): string

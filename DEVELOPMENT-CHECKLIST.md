@@ -342,9 +342,9 @@
 | 4.7 | Drag & drop reorder categories/topics | admin list views | 🟢 |
 
 **Definition of Done Sprint 4**
-- [ ] Admin จัดการ learning paths, glossary ได้
-- [ ] Editor review edit suggestions + contributions ได้
-- [ ] Routes ใหม่ใน `admin/src/router/index.ts`
+- [x] Admin จัดการ learning paths, glossary ได้
+- [x] Editor review edit suggestions + contributions ได้
+- [x] Routes ใหม่ใน `admin/src/router/index.ts`
 
 ---
 
@@ -405,10 +405,10 @@
 | S1 | Frontend Integration | 8 | 8 | 100% | ✅ เสร็จแล้ว |
 | S2 | Article Experience | 7 | 7 | 100% | ✅ เสร็จแล้ว |
 | S3 | Glossary & Learning | 7 | 7 | 100% | ✅ เสร็จแล้ว |
-| S4 | Admin Completion | 7 | 0 | 0% | ⬜ ยังไม่เริ่ม |
+| S4 | Admin Completion | 7 | 7 | 100% | ✅ เสร็จ |
 | S5 | Backend & DevOps | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
 | S6 | Testing & Launch | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
-| **รวม** | | **45** | **22** | **49%** | |
+| **รวม** | | **45** | **29** | **64%** | |
 
 **Milestones**
 
@@ -499,13 +499,13 @@
 | 3.5 | Suggest edit modal ในหน้า article | S3 | ✅ | FE | 3h | 1.1 | ✅ |
 | 3.6 | stores/preferences + theme sync | S3 | ✅ | FE | 2h | 3.4 | ✅ |
 | 3.7 | useKeyboardShortcuts ⌘K | S3 | ✅ | FE | 1h | — | ✅ |
-| 4.1 | Admin LearningPath CRUD | S4 | 🔴 | Admin+BE | 6h | — | ⬜ |
-| 4.2 | Admin EditSuggestion review | S4 | 🔴 | Admin+BE | 5h | 5.3 | ⬜ |
-| 4.3 | Admin Contribution review | S4 | 🔴 | Admin+BE | 4h | 5.3 | ⬜ |
-| 4.4 | Admin Glossary CRUD | S4 | 🟡 | Admin+BE | 4h | — | ⬜ |
-| 4.5 | Version history viewer | S4 | 🟡 | Admin | 4h | — | ⬜ |
-| 4.6 | Schedule publish + bulk actions | S4 | 🟡 | Admin+BE | 5h | — | ⬜ |
-| 4.7 | Drag & drop reorder UI | S4 | 🟢 | Admin | 4h | — | ⬜ |
+| 4.1 | Admin LearningPath CRUD | S4 | 🔴 | Admin+BE | 6h | — | ✅ |
+| 4.2 | Admin EditSuggestion review | S4 | 🔴 | Admin+BE | 5h | 5.3 | ✅ |
+| 4.3 | Admin Contribution review | S4 | 🔴 | Admin+BE | 4h | 5.3 | ✅ |
+| 4.4 | Admin Glossary CRUD | S4 | 🟡 | Admin+BE | 4h | — | ✅ |
+| 4.5 | Version history viewer | S4 | 🟡 | Admin | 4h | — | ✅ |
+| 4.6 | Schedule publish + bulk actions | S4 | 🟡 | Admin+BE | 5h | — | ✅ |
+| 4.7 | Drag & drop reorder UI | S4 | 🟢 | Admin | 4h | — | ✅ |
 | 5.1 | Artisan: view-counts, cleanup-logs, digest | S5 | 🔴 | BE | 4h | — | ⬜ |
 | 5.2 | ConfigureMeilisearch command | S5 | 🟡 | BE | 2h | — | ⬜ |
 | 5.3 | Admin routes edit-suggestions, contributions | S5 | 🔴 | BE | 3h | — | ⬜ |
@@ -593,10 +593,10 @@ flowchart TD
 | S1 Frontend Integration | 8 / 8 | `██████████` 100% |
 | S2 Article Experience | 7 / 7 | `██████████` 100% |
 | S3 Glossary & Learning | 7 / 7 | `██████████` 100% |
-| S4 Admin Completion | 0 / 7 | `░░░░░░░░░░` 0% |
+| S4 Admin Completion | 7 / 7 | `██████████` 100% |
 | S5 Backend & DevOps | 0 / 8 | `░░░░░░░░░░` 0% |
 | S6 Testing & Launch | 0 / 8 | `░░░░░░░░░░` 0% |
-| **TOTAL** | **22 / 45** | `█████░░░░░` **49%** |
+| **TOTAL** | **29 / 45** | `██████░░░░` **64%** |
 
 ### 4.2 Sprint 1 — Frontend Integration (8/8) ✅
 
@@ -650,20 +650,20 @@ flowchart TD
 
 ---
 
-### 4.5 Sprint 4 — Admin Completion (0/7)
+### 4.5 Sprint 4 — Admin Completion (7/7)
 
-- [ ] **4.1** LearningPath admin — controller + `views/learning-paths/*` + router
-- [ ] **4.2** EditSuggestion review — controller + `views/edit-suggestions/*`
-- [ ] **4.3** Contribution review — controller + `views/contributions/*`
-- [ ] **4.4** Glossary admin CRUD
-- [ ] **4.5** Version history viewer — `ArticleEditorView.vue`
-- [ ] **4.6** Schedule publish + bulk actions
-- [ ] **4.7** Drag & drop reorder UI
+- [x] **4.1** LearningPath admin — controller + `views/learning-paths/*` + router
+- [x] **4.2** EditSuggestion review — controller + `views/edit-suggestions/*`
+- [x] **4.3** Contribution review — controller + `views/contributions/*`
+- [x] **4.4** Glossary admin CRUD
+- [x] **4.5** Version history viewer — `ArticleEditorView.vue`
+- [x] **4.6** Schedule publish + bulk actions
+- [x] **4.7** Drag & drop reorder UI
 
 **DoD Sprint 4**
-- [ ] Admin จัดการ learning paths + glossary
-- [ ] Review edit suggestions + contributions
-- [ ] Routes ใหม่ใน `admin/src/router/index.ts`
+- [x] Admin จัดการ learning paths + glossary
+- [x] Review edit suggestions + contributions
+- [x] Routes ใหม่ใน `admin/src/router/index.ts`
 
 ---
 

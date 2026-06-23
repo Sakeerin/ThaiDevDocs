@@ -113,6 +113,10 @@ import {
   SunIcon,
   MoonIcon,
   RectangleStackIcon,
+  AcademicCapIcon,
+  PencilSquareIcon,
+  HandRaisedIcon,
+  BookOpenIcon,
 } from '@heroicons/vue/24/outline'
 
 const route = useRoute()
@@ -128,6 +132,10 @@ const navigation = [
   { name: 'หมวดหมู่', path: '/categories', icon: FolderIcon },
   { name: 'หัวข้อ', path: '/topics', icon: RectangleStackIcon },
   { name: 'แท็ก', path: '/tags', icon: TagIcon },
+  { name: 'เส้นทางเรียน', path: '/learning-paths', icon: AcademicCapIcon },
+  { name: 'พจนานุกรม', path: '/glossary', icon: BookOpenIcon },
+  { name: 'คำแนะนำแก้ไข', path: '/edit-suggestions', icon: PencilSquareIcon },
+  { name: 'การมีส่วนร่วม', path: '/contributions', icon: HandRaisedIcon },
   { name: 'ผู้ใช้', path: '/users', icon: UsersIcon },
   { name: 'ความคิดเห็น', path: '/comments', icon: ChatBubbleLeftIcon },
   { name: 'สื่อ', path: '/media', icon: PhotoIcon },

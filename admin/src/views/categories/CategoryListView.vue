@@ -12,9 +12,13 @@
     </div>
 
     <div class="card overflow-hidden">
+      <p class="px-4 py-2 text-xs text-gray-500 border-b border-gray-200 dark:border-gray-700">
+        ลากแถวเพื่อจัดลำดับหมวดหมู่
+      </p>
       <table class="data-table">
         <thead>
           <tr>
+            <th class="w-10" />
             <th>ชื่อหมวดหมู่</th>
             <th>Slug</th>
             <th>หัวข้อ</th>
@@ -23,7 +27,18 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="category in categories" :key="category.id">
+          <tr
+            v-for="(category, index) in categories"
+            :key="category.id"
+            draggable="true"
+            :class="{ 'opacity-50': dragIndex === index }"
+            @dragstart="onDragStart(index)"
+            @dragover.prevent
+            @drop="onDrop(index)"
+          >
+            <td class="text-gray-400 cursor-grab">
+              <Bars3Icon class="w-5 h-5" />
+            </td>
             <td>
               <div class="flex items-center gap-3">
                 <div
@@ -148,12 +163,13 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-import { PlusIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/vue/24/outline'
 import api from '@/services/api'
 
 const categories = ref<any[]>([])
 const modalOpen = ref(false)
 const editingCategory = ref<any>(null)
+const dragIndex = ref<number | null>(null)
 
 const form = reactive({
   name: '',
@@ -221,6 +237,35 @@ async function confirmDelete(category: any) {
     await fetchCategories()
   } catch (error: any) {
     alert(error.response?.data?.error?.message || 'ไม่สามารถลบได้')
+  }
+}
+
+function onDragStart(index: number) {
+  dragIndex.value = index
+}
+
+async function onDrop(targetIndex: number) {
+  if (dragIndex.value === null || dragIndex.value === targetIndex) {
+    dragIndex.value = null
+    return
+  }
+
+  const reordered = [...categories.value]
+  const [moved] = reordered.splice(dragIndex.value, 1)
+  reordered.splice(targetIndex, 0, moved)
+  categories.value = reordered
+  dragIndex.value = null
+
+  try {
+    await api.patch('/admin/categories/reorder', {
+      items: reordered.map((category, index) => ({
+        id: category.id,
+        sort_order: index,
+      })),
+    })
+  } catch (error) {
+    console.error('Failed to reorder categories:', error)
+    await fetchCategories()
   }
 }
 </script>

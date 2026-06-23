@@ -377,6 +377,49 @@
             </div>
           </div>
         </div>
+
+        <!-- Version History -->
+        <div v-if="isEditing" class="card p-6">
+          <h3 class="font-medium text-gray-900 dark:text-white mb-4">ประวัติเวอร์ชัน</h3>
+          <div v-if="revisionsLoading" class="text-sm text-gray-500">กำลังโหลด...</div>
+          <div v-else-if="!revisions.length" class="text-sm text-gray-500">ยังไม่มีประวัติเวอร์ชัน</div>
+          <div v-else class="space-y-3 max-h-64 overflow-y-auto">
+            <div
+              v-for="revision in revisions"
+              :key="revision.id"
+              class="p-3 rounded-lg bg-gray-50 dark:bg-gray-900 text-sm"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-medium">v{{ revision.version }}</span>
+                <span class="text-xs text-gray-500">{{ formatRevisionDate(revision.created_at) }}</span>
+              </div>
+              <p class="text-xs text-gray-500">{{ revision.user?.name || 'ระบบ' }}</p>
+              <p v-if="revision.change_summary" class="text-xs mt-1">{{ revision.change_summary }}</p>
+              <button
+                type="button"
+                class="text-primary-600 text-xs mt-2 hover:underline"
+                @click="previewRevision(revision)"
+              >
+                ดูเนื้อหา
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revision Preview Modal -->
+    <div
+      v-if="selectedRevision"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      @click.self="selectedRevision = null"
+    >
+      <div class="card max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">เวอร์ชัน {{ selectedRevision.version }}</h2>
+          <button @click="selectedRevision = null"><XMarkIcon class="w-6 h-6" /></button>
+        </div>
+        <pre class="text-xs p-4 bg-gray-100 dark:bg-gray-900 rounded-lg overflow-auto whitespace-pre-wrap">{{ selectedRevision.content }}</pre>
       </div>
     </div>
 
@@ -457,6 +500,9 @@ const selectedCategory = ref('')
 const codeExamples = ref<CodeExample[]>([])
 const relatedArticles = ref<RelatedArticle[]>([])
 const allArticles = ref<RelatedArticle[]>([])
+const revisions = ref<any[]>([])
+const revisionsLoading = ref(false)
+const selectedRevision = ref<any>(null)
 
 const md = new MarkdownIt({
   html: true,
@@ -509,6 +555,7 @@ onMounted(async () => {
 
   if (isEditing.value) {
     await fetchArticle()
+    await fetchRevisions()
   }
 
   // Setup auto-save
@@ -582,6 +629,26 @@ const fetchArticle = async () => {
     console.error('Failed to fetch article:', error)
     router.push('/articles')
   }
+}
+
+const fetchRevisions = async () => {
+  revisionsLoading.value = true
+  try {
+    const response = await api.get<any>(`/admin/articles/${route.params.id}/revisions`)
+    revisions.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch revisions:', error)
+  } finally {
+    revisionsLoading.value = false
+  }
+}
+
+const formatRevisionDate = (date: string) => {
+  return new Date(date).toLocaleString('th-TH')
+}
+
+const previewRevision = (revision: any) => {
+  selectedRevision.value = revision
 }
 
 const fetchCategories = async () => {

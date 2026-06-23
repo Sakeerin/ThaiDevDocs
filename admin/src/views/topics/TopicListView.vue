@@ -31,9 +31,16 @@
     </div>
 
     <div class="card overflow-hidden">
+      <p v-if="selectedCategory" class="px-4 py-2 text-xs text-gray-500 border-b border-gray-200 dark:border-gray-700">
+        ลากแถวเพื่อจัดลำดับหัวข้อในหมวดหมู่นี้
+      </p>
+      <p v-else class="px-4 py-2 text-xs text-amber-600 border-b border-gray-200 dark:border-gray-700">
+        เลือกหมวดหมู่เพื่อจัดลำดับหัวข้อ
+      </p>
       <table class="data-table">
         <thead>
           <tr>
+            <th class="w-10" />
             <th>หัวข้อ</th>
             <th>หมวดหมู่</th>
             <th>บทความ</th>
@@ -43,7 +50,18 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="topic in topics" :key="topic.id">
+          <tr
+            v-for="(topic, index) in topics"
+            :key="topic.id"
+            :draggable="!!selectedCategory"
+            :class="{ 'opacity-50': dragIndex === index, 'cursor-grab': !!selectedCategory }"
+            @dragstart="onDragStart(index)"
+            @dragover.prevent
+            @drop="onDrop(index)"
+          >
+            <td class="text-gray-400">
+              <Bars3Icon v-if="selectedCategory" class="w-5 h-5" />
+            </td>
             <td>
               <div class="flex items-center gap-3">
                 <span v-if="topic.icon" class="text-xl">{{ topic.icon }}</span>
@@ -60,22 +78,7 @@
             </td>
             <td>{{ topic.articles_count }}</td>
             <td>
-              <div class="flex items-center gap-1">
-                <button
-                  @click="moveUp(topic)"
-                  :disabled="topic.order_index === 0"
-                  class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
-                >
-                  <ChevronUpIcon class="w-4 h-4" />
-                </button>
-                <span class="text-sm text-gray-500 w-6 text-center">{{ topic.order_index + 1 }}</span>
-                <button
-                  @click="moveDown(topic)"
-                  class="p-1 text-gray-400 hover:text-gray-600"
-                >
-                  <ChevronDownIcon class="w-4 h-4" />
-                </button>
-              </div>
+              <span class="text-sm text-gray-500">{{ (topic.sort_order ?? 0) + 1 }}</span>
             </td>
             <td>
               <span :class="topic.is_active ? 'badge-success' : 'badge-danger'">
@@ -100,7 +103,7 @@
             </td>
           </tr>
           <tr v-if="topics.length === 0">
-            <td colspan="6" class="text-center py-8 text-gray-500">
+            <td colspan="7" class="text-center py-8 text-gray-500">
               ไม่พบหัวข้อ
             </td>
           </tr>
@@ -195,7 +198,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionRoot, TransitionChild } from '@headlessui/vue'
-import { PlusIcon, PencilIcon, TrashIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/24/outline'
+import { PlusIcon, PencilIcon, TrashIcon, Bars3Icon } from '@heroicons/vue/24/outline'
 import api from '@/services/api'
 
 interface Topic {
@@ -205,7 +208,7 @@ interface Topic {
   slug: string
   description?: string
   icon?: string
-  order_index: number
+  sort_order: number
   is_active: boolean
   articles_count: number
   category?: {
@@ -222,6 +225,7 @@ const editingTopic = ref<Topic | null>(null)
 const isSaving = ref(false)
 const selectedCategory = ref('')
 const searchQuery = ref('')
+const dragIndex = ref<number | null>(null)
 let searchTimeout: NodeJS.Timeout
 
 const form = reactive({
@@ -311,24 +315,6 @@ async function saveTopic() {
   }
 }
 
-async function moveUp(topic: Topic) {
-  try {
-    await api.post(`/admin/topics/${topic.id}/reorder`, { direction: 'up' })
-    await fetchTopics()
-  } catch (error) {
-    console.error('Failed to reorder:', error)
-  }
-}
-
-async function moveDown(topic: Topic) {
-  try {
-    await api.post(`/admin/topics/${topic.id}/reorder`, { direction: 'down' })
-    await fetchTopics()
-  } catch (error) {
-    console.error('Failed to reorder:', error)
-  }
-}
-
 async function confirmDelete(topic: Topic) {
   if (!confirm(`ต้องการลบหัวข้อ "${topic.name}" หรือไม่?`)) return
   
@@ -337,6 +323,36 @@ async function confirmDelete(topic: Topic) {
     await fetchTopics()
   } catch (error: any) {
     alert(error.response?.data?.error?.message || 'ไม่สามารถลบได้')
+  }
+}
+
+function onDragStart(index: number) {
+  if (!selectedCategory.value) return
+  dragIndex.value = index
+}
+
+async function onDrop(targetIndex: number) {
+  if (!selectedCategory.value || dragIndex.value === null || dragIndex.value === targetIndex) {
+    dragIndex.value = null
+    return
+  }
+
+  const reordered = [...topics.value]
+  const [moved] = reordered.splice(dragIndex.value, 1)
+  reordered.splice(targetIndex, 0, moved)
+  topics.value = reordered
+  dragIndex.value = null
+
+  try {
+    await api.patch('/admin/topics/reorder', {
+      items: reordered.map((topic, index) => ({
+        id: topic.id,
+        sort_order: index,
+      })),
+    })
+  } catch (error) {
+    console.error('Failed to reorder topics:', error)
+    await fetchTopics()
   }
 }
 </script>

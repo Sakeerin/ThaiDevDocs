@@ -73,6 +73,36 @@ const routes: RouteRecordRaw[] = [
         path: 'settings',
         name: 'settings',
         component: () => import('@/views/settings/SettingsView.vue')
+      },
+      {
+        path: 'learning-paths',
+        name: 'learning-paths',
+        component: () => import('@/views/learning-paths/LearningPathListView.vue')
+      },
+      {
+        path: 'learning-paths/create',
+        name: 'learning-path-create',
+        component: () => import('@/views/learning-paths/LearningPathEditorView.vue')
+      },
+      {
+        path: 'learning-paths/:id/edit',
+        name: 'learning-path-edit',
+        component: () => import('@/views/learning-paths/LearningPathEditorView.vue')
+      },
+      {
+        path: 'edit-suggestions',
+        name: 'edit-suggestions',
+        component: () => import('@/views/edit-suggestions/EditSuggestionListView.vue')
+      },
+      {
+        path: 'contributions',
+        name: 'contributions',
+        component: () => import('@/views/contributions/ContributionListView.vue')
+      },
+      {
+        path: 'glossary',
+        name: 'glossary',
+        component: () => import('@/views/glossary/GlossaryListView.vue')
       }
     ]
   },
