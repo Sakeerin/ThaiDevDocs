@@ -182,4 +182,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return in_array($this->role, ['contributor', 'editor', 'admin', 'super_admin']);
     }
+
+    /**
+     * Send the email verification notification.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\VerifyEmailNotification);
+    }
 }

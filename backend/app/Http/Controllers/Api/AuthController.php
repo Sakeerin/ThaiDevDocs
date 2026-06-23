@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserPreference;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Laravel\Socialite\Facades\Socialite;
@@ -201,6 +203,64 @@ class AuthController extends Controller
             'RESET_FAILED',
             400
         );
+    }
+
+    /**
+     * Verify email address via signed link.
+     */
+    public function verifyEmail(Request $request): JsonResponse
+    {
+        if (!URL::hasValidSignature($request)) {
+            return $this->error(
+                'Invalid or expired verification link.',
+                'INVALID_SIGNATURE',
+                403
+            );
+        }
+
+        $validated = $request->validate([
+            'id' => ['required', 'integer'],
+            'hash' => ['required', 'string'],
+        ]);
+
+        $user = User::find($validated['id']);
+
+        if (!$user) {
+            return $this->error('User not found.', 'NOT_FOUND', 404);
+        }
+
+        if (!hash_equals($validated['hash'], sha1($user->getEmailForVerification()))) {
+            return $this->error('Invalid verification hash.', 'INVALID_HASH', 403);
+        }
+
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            event(new Verified($user));
+        }
+
+        return $this->success([
+            'email_verified' => true,
+        ], 'Email verified successfully.');
+    }
+
+    /**
+     * Resend email verification notification.
+     */
+    public function resendVerificationEmail(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return $this->error(
+                'Email is already verified.',
+                'ALREADY_VERIFIED',
+                400
+            );
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return $this->success(null, 'Verification link sent to your email.');
     }
 
     /**

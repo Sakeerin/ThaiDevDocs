@@ -39,7 +39,7 @@ use App\Http\Controllers\Admin\GlossaryController as AdminGlossaryController;
 */
 
 // API Version 1
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -49,10 +49,13 @@ Route::prefix('v1')->group(function () {
 
     // Authentication
     Route::prefix('auth')->group(function () {
-        Route::post('register', [AuthController::class, 'register']);
-        Route::post('login', [AuthController::class, 'login']);
-        Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-        Route::post('reset-password', [AuthController::class, 'resetPassword']);
+        Route::middleware('throttle:auth')->group(function () {
+            Route::post('register', [AuthController::class, 'register']);
+            Route::post('login', [AuthController::class, 'login']);
+            Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+            Route::post('reset-password', [AuthController::class, 'resetPassword']);
+        });
+        Route::get('email/verify', [AuthController::class, 'verifyEmail'])->name('verification.verify');
         Route::post('social/{provider}', [AuthController::class, 'socialLogin']);
     });
 
@@ -109,6 +112,7 @@ Route::prefix('v1')->group(function () {
         Route::post('auth/refresh', [AuthController::class, 'refresh']);
         Route::get('auth/user', [AuthController::class, 'user']);
         Route::patch('auth/user', [AuthController::class, 'updateProfile']);
+        Route::post('auth/email/resend', [AuthController::class, 'resendVerificationEmail']);
 
         // User Profile
         Route::get('user/profile', [UserController::class, 'profile']);

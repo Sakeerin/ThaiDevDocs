@@ -37,3 +37,6 @@ Schedule::command('sanctum:prune-expired --hours=24')->daily();
 
 // Sync search indexes
 Schedule::command('scout:sync-index-settings')->weekly();
+
+// Apply Meilisearch index settings
+Schedule::command('meilisearch:configure')->weekly();

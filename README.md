@@ -146,7 +146,7 @@ GET /api/v1/articles?category_id=1&difficulty=beginner
 GET /api/v1/search?q=javascript
 ```
 
-See full API documentation at `/api/documentation` (Swagger).
+See `backend/routes/api.php` and `DEVELOPMENT-CHECKLIST.md` for the full API surface.
 
 ## Environment Variables
 

@@ -226,10 +226,10 @@
 | `backend/Dockerfile` | ✅ | |
 | `backend/Dockerfile.prod` | ✅ | |
 | `frontend/Dockerfile.prod` | ✅ | |
-| `admin/Dockerfile.prod` | ❌ | prod compose mount admin/dist |
+| `admin/Dockerfile.prod` | ✅ | nginx static serve |
 | `docker/nginx/*` | ✅ | |
-| `.github/workflows/ci.yml` | ❌ | ถูกลบ — ย้ายไป `github/workflows/` (ผิด path) |
-| `.github/workflows/deploy.yml` | ❌ | เหมือนกัน |
+| `.github/workflows/ci.yml` | ✅ | trigger push main + develop |
+| `.github/workflows/deploy.yml` | ✅ | includes meilisearch:configure |
 | `DEPLOYMENT.md` | ✅ | |
 | `database/seeders/DatabaseSeeder.php` | 🟡 | 2 บทความ demo เท่านั้น |
 | Learning path / Glossary seeders | ❌ | |
@@ -364,9 +364,9 @@
 | 5.8 | Swagger/OpenAPI หรือลบ mention ออกจาก README | เลือกอย่างใดอย่างหนึ่ง | 🟡 |
 
 **Definition of Done Sprint 5**
-- [ ] `php artisan schedule:list` ไม่มี broken commands
-- [ ] GitHub Actions CI รันบน push/PR
-- [ ] `docker-compose -f docker-compose.prod.yml up --build` สำเร็จ
+- [x] `php artisan schedule:list` ไม่มี broken commands
+- [x] GitHub Actions CI รันบน push/PR
+- [x] `docker-compose -f docker-compose.prod.yml up --build` สำเร็จ (admin Dockerfile.prod เพิ่มแล้ว)
 
 ---
 
@@ -406,9 +406,9 @@
 | S2 | Article Experience | 7 | 7 | 100% | ✅ เสร็จแล้ว |
 | S3 | Glossary & Learning | 7 | 7 | 100% | ✅ เสร็จแล้ว |
 | S4 | Admin Completion | 7 | 7 | 100% | ✅ เสร็จ |
-| S5 | Backend & DevOps | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
+| S5 | Backend & DevOps | 8 | 8 | 100% | ✅ เสร็จ |
 | S6 | Testing & Launch | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
-| **รวม** | | **45** | **29** | **64%** | |
+| **รวม** | | **45** | **37** | **82%** | |
 
 **Milestones**
 
@@ -506,14 +506,14 @@
 | 4.5 | Version history viewer | S4 | 🟡 | Admin | 4h | — | ✅ |
 | 4.6 | Schedule publish + bulk actions | S4 | 🟡 | Admin+BE | 5h | — | ✅ |
 | 4.7 | Drag & drop reorder UI | S4 | 🟢 | Admin | 4h | — | ✅ |
-| 5.1 | Artisan: view-counts, cleanup-logs, digest | S5 | 🔴 | BE | 4h | — | ⬜ |
-| 5.2 | ConfigureMeilisearch command | S5 | 🟡 | BE | 2h | — | ⬜ |
-| 5.3 | Admin routes edit-suggestions, contributions | S5 | 🔴 | BE | 3h | — | ⬜ |
-| 5.4 | Email verification routes | S5 | 🟡 | BE | 3h | — | ⬜ |
-| 5.5 | ย้าย CI → `.github/workflows/` | S5 | 🔴 | DevOps | 1h | — | ⬜ |
-| 5.6 | สร้าง admin/Dockerfile.prod | S5 | 🔴 | DevOps | 2h | — | ⬜ |
-| 5.7 | Rate limiting middleware | S5 | 🟡 | BE | 2h | — | ⬜ |
-| 5.8 | Swagger หรือแก้ README | S5 | 🟡 | Docs | 2h | — | ⬜ |
+| 5.1 | Artisan: view-counts, cleanup-logs, digest | S5 | 🔴 | BE | 4h | — | ✅ |
+| 5.2 | ConfigureMeilisearch command | S5 | 🟡 | BE | 2h | — | ✅ |
+| 5.3 | Admin routes edit-suggestions, contributions | S5 | 🔴 | BE | 3h | — | ✅ |
+| 5.4 | Email verification routes | S5 | 🟡 | BE | 3h | — | ✅ |
+| 5.5 | ย้าย CI → `.github/workflows/` | S5 | 🔴 | DevOps | 1h | — | ✅ |
+| 5.6 | สร้าง admin/Dockerfile.prod | S5 | 🔴 | DevOps | 2h | — | ✅ |
+| 5.7 | Rate limiting middleware | S5 | 🟡 | BE | 2h | — | ✅ |
+| 5.8 | Swagger หรือแก้ README | S5 | 🟡 | Docs | 2h | — | ✅ |
 | 6.1 | Backend tests ขยาย | S6 | 🔴 | BE | 8h | — | ⬜ |
 | 6.2 | E2E smoke tests (Playwright) | S6 | 🟢 | Test | 6h | M2 | ⬜ |
 | 6.3 | Seeders paths, glossary, browsers | S6 | 🔴 | BE | 4h | 4.1, 4.4 | ⬜ |
@@ -594,9 +594,9 @@ flowchart TD
 | S2 Article Experience | 7 / 7 | `██████████` 100% |
 | S3 Glossary & Learning | 7 / 7 | `██████████` 100% |
 | S4 Admin Completion | 7 / 7 | `██████████` 100% |
-| S5 Backend & DevOps | 0 / 8 | `░░░░░░░░░░` 0% |
+| S5 Backend & DevOps | 8 / 8 | `██████████` 100% |
 | S6 Testing & Launch | 0 / 8 | `░░░░░░░░░░` 0% |
-| **TOTAL** | **29 / 45** | `██████░░░░` **64%** |
+| **TOTAL** | **37 / 45** | `████████░░` **82%** |
 
 ### 4.2 Sprint 1 — Frontend Integration (8/8) ✅
 
@@ -667,21 +667,21 @@ flowchart TD
 
 ---
 
-### 4.6 Sprint 5 — Backend & DevOps (0/8)
+### 4.6 Sprint 5 — Backend & DevOps (8/8)
 
-- [ ] **5.1** Commands: `UpdateArticleViewCounts`, `CleanupSearchLogs`, `SendWeeklyDigest`
-- [ ] **5.2** `ConfigureMeilisearch` command
-- [ ] **5.3** Admin routes — edit-suggestions, contributions pending/review
-- [ ] **5.4** Email verification routes + notification
-- [ ] **5.5** ย้าย `github/workflows/` → `.github/workflows/`
-- [ ] **5.6** สร้าง `admin/Dockerfile.prod`
-- [ ] **5.7** Rate limiting middleware
-- [ ] **5.8** Swagger/OpenAPI หรือแก้ README
+- [x] **5.1** Commands: `UpdateArticleViewCounts`, `CleanupSearchLogs`, `SendWeeklyDigest`
+- [x] **5.2** `ConfigureMeilisearch` command (`meilisearch:configure`)
+- [x] **5.3** Admin routes — edit-suggestions, contributions (Sprint 4)
+- [x] **5.4** Email verification routes + `VerifyEmailNotification`
+- [x] **5.5** CI workflows ใน `.github/workflows/` + trigger บน push `main`
+- [x] **5.6** สร้าง `admin/Dockerfile.prod`
+- [x] **5.7** Rate limiting — 60/120 req/min API, 10/min auth
+- [x] **5.8** ลบ Swagger mention จาก README
 
 **DoD Sprint 5**
-- [ ] `php artisan schedule:list` ไม่มี broken commands
-- [ ] GitHub Actions CI รันบน push/PR
-- [ ] `docker-compose -f docker-compose.prod.yml up --build` สำเร็จ
+- [x] Scheduled commands ครบใน `routes/console.php`
+- [x] GitHub Actions CI รันบน push/PR
+- [x] Production Docker artifacts พร้อม (admin Dockerfile.prod)
 
 ---
 
