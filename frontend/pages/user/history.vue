@@ -58,7 +58,7 @@
                     {{ item.article?.topic?.category?.name }} / {{ item.article?.topic?.name }}
                   </span>
                 </div>
-                <NuxtLink :to="`/docs/${item.article?.slug}`" class="block group-hover:text-primary-600 transition-colors">
+                <NuxtLink :to="getHistoryArticlePath(item)" class="block group-hover:text-primary-600 transition-colors">
                   <h4 class="text-lg font-medium text-gray-900 dark:text-white line-clamp-1">
                     {{ item.article?.title }}
                   </h4>
@@ -87,18 +87,12 @@
               <!-- Actions -->
               <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
+                  v-if="item.article"
                   @click="addToBookmarks(item.article)"
                   class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
                   title="เพิ่มบุ๊กมาร์ก"
                 >
                   <Icon name="heroicons:bookmark" class="w-5 h-5" />
-                </button>
-                <button
-                  @click="removeFromHistory(item.id)"
-                  class="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
-                  title="ลบออกจากประวัติ"
-                >
-                  <Icon name="heroicons:x-mark" class="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -135,6 +129,8 @@
 </template>
 
 <script setup lang="ts">
+import { getArticlePath } from '~/utils/content'
+
 definePageMeta({
   middleware: 'auth',
 })
@@ -206,8 +202,8 @@ onMounted(fetchHistory)
 async function fetchHistory() {
   isLoading.value = true
   try {
-    const { data } = await $api('/user/reading-history')
-    history.value = data
+    const response = await $api<{ data: any[] }>('/history')
+    history.value = response.data ?? []
   } catch (e) {
     console.error('Failed to fetch history:', e)
   } finally {
@@ -215,24 +211,20 @@ async function fetchHistory() {
   }
 }
 
-async function removeFromHistory(id: number) {
-  try {
-    await $api(`/user/reading-history/${id}`, { method: 'DELETE' })
-    history.value = history.value.filter(h => h.id !== id)
-  } catch (e) {
-    console.error('Failed to remove from history:', e)
-  }
-}
-
 async function clearHistory() {
   if (!confirm('ต้องการล้างประวัติการอ่านทั้งหมดหรือไม่?')) return
-  
+
   try {
-    await $api('/user/reading-history', { method: 'DELETE' })
+    await $api('/history', { method: 'DELETE' })
     history.value = []
   } catch (e) {
     console.error('Failed to clear history:', e)
   }
+}
+
+function getHistoryArticlePath(item: any) {
+  if (!item.article) return '/docs'
+  return getArticlePath(item.article)
 }
 
 async function addToBookmarks(article: any) {

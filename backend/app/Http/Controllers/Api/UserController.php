@@ -123,11 +123,40 @@ class UserController extends Controller
     {
         $history = $request->user()
             ->readingHistory()
-            ->with('article:id,title,slug,summary,reading_time,difficulty')
+            ->with([
+                'article:id,title,slug,summary,reading_time,difficulty,topic_id',
+                'article.topic:id,name,slug,category_id',
+                'article.topic.category:id,name,slug,color,icon',
+            ])
             ->orderByDesc('last_read_at')
             ->paginate($request->input('per_page', 20));
 
-        return $this->successWithPagination($history);
+        return $this->successWithPagination($history->through(fn ($item) => [
+            'id' => $item->id,
+            'article_id' => $item->article_id,
+            'reading_progress' => $item->progress,
+            'progress' => $item->progress,
+            'time_spent' => $item->time_spent,
+            'last_read_at' => $item->last_read_at?->toISOString(),
+            'article' => $item->article ? [
+                'id' => $item->article->id,
+                'title' => $item->article->title,
+                'slug' => $item->article->slug,
+                'summary' => $item->article->summary,
+                'reading_time' => $item->article->reading_time,
+                'difficulty' => $item->article->difficulty,
+                'topic' => $item->article->topic ? [
+                    'name' => $item->article->topic->name,
+                    'slug' => $item->article->topic->slug,
+                    'category' => $item->article->topic->category ? [
+                        'name' => $item->article->topic->category->name,
+                        'slug' => $item->article->topic->category->slug,
+                        'color' => $item->article->topic->category->color,
+                        'icon' => $item->article->topic->category->icon,
+                    ] : null,
+                ] : null,
+            ] : null,
+        ]));
     }
 
     /**
@@ -146,11 +175,13 @@ class UserController extends Controller
                 'user_id' => $request->user()->id,
                 'article_id' => $validated['article_id'],
             ],
-            [
-                'progress' => $validated['progress'] ?? 0,
-                'time_spent' => \DB::raw('time_spent + ' . ($validated['time_spent'] ?? 0)),
+            array_filter([
+                'progress' => $validated['progress'] ?? null,
+                'time_spent' => isset($validated['time_spent'])
+                    ? \DB::raw('time_spent + ' . $validated['time_spent'])
+                    : null,
                 'last_read_at' => now(),
-            ]
+            ], fn ($value) => $value !== null)
         );
 
         return $this->success(['history' => $history]);

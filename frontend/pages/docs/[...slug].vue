@@ -115,35 +115,50 @@
         <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <!-- Feedback -->
-            <div class="flex items-center gap-4">
-              <span class="text-gray-600 dark:text-gray-400">บทความนี้มีประโยชน์หรือไม่?</span>
-              <button
-                @click="submitFeedback(true)"
-                class="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-500 hover:text-green-600"
-              >
-                <HandThumbUpIcon class="w-6 h-6" />
-              </button>
-              <button
-                @click="submitFeedback(false)"
-                class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 hover:text-red-600"
-              >
-                <HandThumbDownIcon class="w-6 h-6" />
-              </button>
+            <div class="flex items-center gap-3 flex-wrap">
+              <template v-if="feedbackSubmitted">
+                <span class="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <CheckCircleIcon class="w-5 h-5" />
+                  ขอบคุณสำหรับความคิดเห็น!
+                </span>
+              </template>
+              <template v-else>
+                <span class="text-gray-600 dark:text-gray-400">บทความนี้มีประโยชน์หรือไม่?</span>
+                <button
+                  type="button"
+                  :disabled="isFeedbackLoading"
+                  class="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-500 hover:text-green-600 disabled:opacity-50"
+                  @click="submitFeedback(true)"
+                >
+                  <HandThumbUpIcon class="w-6 h-6" />
+                </button>
+                <button
+                  type="button"
+                  :disabled="isFeedbackLoading"
+                  class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 hover:text-red-600 disabled:opacity-50"
+                  @click="submitFeedback(false)"
+                >
+                  <HandThumbDownIcon class="w-6 h-6" />
+                </button>
+              </template>
             </div>
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
               <button
-                @click="toggleBookmark"
-                class="btn-secondary flex items-center gap-2"
+                type="button"
+                :disabled="isBookmarkLoading"
+                class="btn-secondary flex items-center gap-2 disabled:opacity-50"
+                @click="handleToggleBookmark"
               >
                 <BookmarkIcon v-if="!isBookmarked" class="w-5 h-5" />
                 <BookmarkSolidIcon v-else class="w-5 h-5 text-primary-600" />
-                บุ๊คมาร์ค
+                {{ isBookmarked ? 'บันทึกแล้ว' : 'บุ๊คมาร์ค' }}
               </button>
               <button
-                @click="shareArticle"
+                type="button"
                 class="btn-secondary flex items-center gap-2"
+                @click="shareArticle"
               >
                 <ShareIcon class="w-5 h-5" />
                 แชร์
@@ -180,36 +195,40 @@ import {
   ShareIcon,
   HandThumbUpIcon,
   HandThumbDownIcon,
+  CheckCircleIcon,
 } from '@heroicons/vue/24/outline'
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/vue/24/solid'
+import { getArticleSlugFromRoute } from '~/utils/article'
 
 const route = useRoute()
 const config = useRuntimeConfig()
+const { isAuthenticated } = useAuth()
+const { $api } = useNuxtApp()
+const { isBookmarked, isLoading: isBookmarkLoading, loadStatus, toggle: toggleBookmark } = useBookmarks()
+const { startTracking, stopTracking } = useReadingHistory()
 
-// Get article slug from route
-const slug = computed(() => {
-  const slugParts = route.params.slug
-  return Array.isArray(slugParts) ? slugParts.join('/') : slugParts
-})
+const articleSlug = computed(() => getArticleSlugFromRoute(route.params.slug))
 
 // Fetch article data
 const { data: articleData, pending, error } = await useFetch<any>(
-  () => `${config.public.apiBase}/articles/${slug.value}`,
+  () => `${config.public.apiBase}/articles/${articleSlug.value}`,
   {
-    key: `article-${slug.value}`,
+    key: () => `article-${articleSlug.value}`,
     transform: (response) => response.data,
-  }
+    watch: [articleSlug],
+  },
 )
 
 const article = computed(() => articleData.value?.article)
 
 // Fetch related articles
 const { data: relatedData } = await useFetch<any>(
-  () => `${config.public.apiBase}/articles/${slug.value}/related`,
+  () => `${config.public.apiBase}/articles/${articleSlug.value}/related`,
   {
-    key: `related-${slug.value}`,
+    key: () => `related-${articleSlug.value}`,
     transform: (response) => response.data?.articles || [],
-  }
+    watch: [articleSlug],
+  },
 )
 
 const relatedArticles = computed(() => relatedData.value || [])
@@ -224,8 +243,30 @@ useHead({
   ],
 })
 
-// State
-const isBookmarked = ref(false)
+// Feedback state
+const feedbackSubmitted = ref(false)
+const isFeedbackLoading = ref(false)
+
+// Load bookmark status + reading history when article is available
+watch(
+  [article, isAuthenticated],
+  ([currentArticle, authed]) => {
+    if (currentArticle?.slug) {
+      loadStatus(currentArticle.slug)
+    }
+
+    if (currentArticle?.id && authed) {
+      startTracking(currentArticle.id)
+    } else {
+      stopTracking()
+    }
+  },
+  { immediate: true },
+)
+
+watch(articleSlug, () => {
+  stopTracking()
+})
 
 // Computed
 const difficultyLabel = computed(() => {
@@ -256,13 +297,31 @@ const formatDate = (date: string) => {
 }
 
 const submitFeedback = async (isHelpful: boolean) => {
-  // TODO: Implement feedback submission
-  console.log('Feedback:', isHelpful)
+  if (!isAuthenticated.value) {
+    await navigateTo({ path: '/auth/login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  if (!article.value?.slug || feedbackSubmitted.value || isFeedbackLoading.value) return
+
+  isFeedbackLoading.value = true
+
+  try {
+    await $api(`/articles/${article.value.slug}/feedback`, {
+      method: 'POST',
+      body: { is_helpful: isHelpful },
+    })
+    feedbackSubmitted.value = true
+  } catch {
+    // Error toast could be added later
+  } finally {
+    isFeedbackLoading.value = false
+  }
 }
 
-const toggleBookmark = async () => {
-  // TODO: Implement bookmark toggle
-  isBookmarked.value = !isBookmarked.value
+const handleToggleBookmark = async () => {
+  if (!article.value) return
+  await toggleBookmark({ id: article.value.id, slug: article.value.slug })
 }
 
 const shareArticle = async () => {

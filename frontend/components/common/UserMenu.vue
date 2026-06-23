@@ -5,7 +5,7 @@
         v-if="user?.avatar"
         :src="user.avatar"
         :alt="user.name"
-        class="w-8 h-8 rounded-full"
+        class="w-8 h-8 rounded-full object-cover"
       />
       <div v-else class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
         <span class="text-primary-600 dark:text-primary-400 font-medium text-sm">
@@ -57,19 +57,19 @@
           </MenuItem>
           <MenuItem v-slot="{ active }">
             <NuxtLink
-              to="/user/collections"
+              to="/user/history"
               :class="[
                 active ? 'bg-gray-50 dark:bg-gray-800' : '',
                 'flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200'
               ]"
             >
-              <FolderIcon class="w-5 h-5 text-gray-400" />
-              คอลเลกชัน
+              <ClockIcon class="w-5 h-5 text-gray-400" />
+              ประวัติการอ่าน
             </NuxtLink>
           </MenuItem>
           <MenuItem v-slot="{ active }">
             <NuxtLink
-              to="/user/settings"
+              to="/user/preferences"
               :class="[
                 active ? 'bg-gray-50 dark:bg-gray-800' : '',
                 'flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200'
@@ -85,14 +85,16 @@
         <div class="py-1">
           <MenuItem v-slot="{ active }">
             <button
-              @click="logout"
+              type="button"
+              :disabled="isLoggingOut"
+              @click="handleLogout"
               :class="[
                 active ? 'bg-gray-50 dark:bg-gray-800' : '',
-                'flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200'
+                'flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 disabled:opacity-50'
               ]"
             >
               <ArrowRightOnRectangleIcon class="w-5 h-5 text-gray-400" />
-              ออกจากระบบ
+              {{ isLoggingOut ? 'กำลังออกจากระบบ...' : 'ออกจากระบบ' }}
             </button>
           </MenuItem>
         </div>
@@ -106,20 +108,20 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import {
   UserIcon,
   BookmarkIcon,
-  FolderIcon,
+  ClockIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/vue/24/outline'
 
-// TODO: Connect to auth store
-const user = ref({
-  name: 'Test User',
-  email: 'test@example.com',
-  avatar: null,
-})
+const { user, logout } = useAuth()
+const isLoggingOut = ref(false)
 
-const logout = async () => {
-  // TODO: Implement logout
-  console.log('Logout')
+const handleLogout = async () => {
+  isLoggingOut.value = true
+  try {
+    await logout()
+  } finally {
+    isLoggingOut.value = false
+  }
 }
 </script>

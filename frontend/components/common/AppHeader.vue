@@ -61,16 +61,23 @@
           </button>
 
           <!-- User Menu -->
-          <div v-if="isAuthenticated" class="relative">
-            <UserMenu />
-          </div>
-          <NuxtLink
+          <template v-if="isAuthReady">
+            <div v-if="isAuthenticated" class="relative">
+              <UserMenu />
+            </div>
+            <NuxtLink
+              v-else
+              to="/auth/login"
+              class="btn-primary text-sm"
+            >
+              เข้าสู่ระบบ
+            </NuxtLink>
+          </template>
+          <div
             v-else
-            to="/auth/login"
-            class="btn-primary text-sm"
-          >
-            เข้าสู่ระบบ
-          </NuxtLink>
+            class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse"
+            aria-hidden="true"
+          />
         </nav>
       </div>
 
@@ -109,7 +116,7 @@ import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/out
 
 const isMobileMenuOpen = ref(false)
 const isSearchOpen = ref(false)
-const isAuthenticated = ref(false) // TODO: Connect to auth store
+const { isAuthenticated, isAuthReady } = useAuth()
 
 const openSearch = () => {
   isSearchOpen.value = true

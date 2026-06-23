@@ -29,7 +29,7 @@
 
           <!-- Quick Links -->
           <div class="flex flex-wrap justify-center gap-3">
-            <NuxtLink to="/docs/html" class="btn-primary">
+            <NuxtLink :to="startLearningLink" class="btn-primary">
               เริ่มต้นเรียนรู้
             </NuxtLink>
             <NuxtLink to="/learn" class="btn-outline">
@@ -47,21 +47,34 @@
           หมวดหมู่เอกสาร
         </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="card p-6 animate-pulse"
+          >
+            <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-800 mb-4" />
+            <div class="h-6 bg-gray-200 dark:bg-gray-800 rounded w-2/3 mb-2" />
+            <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full mb-2" />
+            <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-4/5" />
+          </div>
+        </div>
+
+        <div v-else-if="categories.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <NuxtLink
-            v-for="category in featuredCategories"
+            v-for="category in categories"
             :key="category.slug"
             :to="`/docs/${category.slug}`"
             class="card p-6 hover:shadow-lg hover:border-primary-200 dark:hover:border-primary-800 transition-all group"
           >
             <div
               class="w-12 h-12 rounded-lg mb-4 flex items-center justify-center"
-              :style="{ backgroundColor: category.color + '20' }"
+              :style="{ backgroundColor: (category.color || defaultCategoryColor) + '20' }"
             >
               <component
                 :is="getCategoryIcon(category.icon)"
                 class="w-6 h-6"
-                :style="{ color: category.color }"
+                :style="{ color: category.color || defaultCategoryColor }"
               />
             </div>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
@@ -76,6 +89,10 @@
             </span>
           </NuxtLink>
         </div>
+
+        <p v-else class="text-center text-gray-500 dark:text-gray-400">
+          ยังไม่มีหมวดหมู่เอกสาร
+        </p>
       </div>
     </section>
 
@@ -86,40 +103,96 @@
           <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
             บทความแนะนำ
           </h2>
-          <NuxtLink to="/articles" class="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
+          <NuxtLink to="/search" class="text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
             ดูทั้งหมด
             <ArrowRightIcon class="w-4 h-4" />
           </NuxtLink>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="i in 3" :key="i" class="card p-6 animate-pulse">
+            <div class="h-5 bg-gray-200 dark:bg-gray-800 rounded w-1/3 mb-3" />
+            <div class="h-6 bg-gray-200 dark:bg-gray-800 rounded w-full mb-2" />
+            <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-full mb-4" />
+            <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
+          </div>
+        </div>
+
+        <div v-else-if="featuredArticles.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <ArticleCard
             v-for="article in featuredArticles"
             :key="article.id"
             :article="article"
           />
         </div>
+
+        <p v-else class="text-center text-gray-500 dark:text-gray-400">
+          ยังไม่มีบทความแนะนำ
+        </p>
+      </div>
+    </section>
+
+    <!-- Recent & Popular Articles -->
+    <section v-if="!isLoading && (recentArticles.length > 0 || popularArticles.length > 0)" class="py-16 lg:py-24">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <!-- Recent -->
+          <div v-if="recentArticles.length > 0">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              บทความล่าสุด
+            </h2>
+            <div class="space-y-4">
+              <ArticleCard
+                v-for="article in recentArticles"
+                :key="`recent-${article.id}`"
+                :article="article"
+              />
+            </div>
+          </div>
+
+          <!-- Popular -->
+          <div v-if="popularArticles.length > 0">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              บทความยอดนิยม
+            </h2>
+            <div class="space-y-4">
+              <ArticleCard
+                v-for="article in popularArticles"
+                :key="`popular-${article.id}`"
+                :article="article"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <!-- Stats Section -->
-    <section class="py-16 lg:py-24">
+    <section class="py-16 lg:py-24 bg-gray-50 dark:bg-gray-900/50">
       <div class="container mx-auto px-4">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
           <div>
-            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">500+</div>
+            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+              {{ stats.articles }}+
+            </div>
             <div class="text-gray-600 dark:text-gray-400">บทความ</div>
           </div>
           <div>
-            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">50+</div>
+            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+              {{ stats.topics }}+
+            </div>
             <div class="text-gray-600 dark:text-gray-400">หัวข้อ</div>
           </div>
           <div>
-            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">1000+</div>
-            <div class="text-gray-600 dark:text-gray-400">ผู้ใช้งาน</div>
+            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+              {{ stats.categories }}+
+            </div>
+            <div class="text-gray-600 dark:text-gray-400">หมวดหมู่</div>
           </div>
           <div>
-            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">100%</div>
+            <div class="text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+              100%
+            </div>
             <div class="text-gray-600 dark:text-gray-400">ฟรี</div>
           </div>
         </div>
@@ -135,7 +208,7 @@
         <p class="text-primary-100 mb-8 max-w-2xl mx-auto">
           เริ่มต้นเรียนรู้การพัฒนาซอฟต์แวร์ด้วยเอกสารภาษาไทยที่เข้าใจง่าย
         </p>
-        <NuxtLink to="/docs/html/getting-started" class="btn bg-white text-primary-600 hover:bg-primary-50">
+        <NuxtLink :to="ctaLink" class="btn bg-white text-primary-600 hover:bg-primary-50">
           เริ่มต้นเลย
         </NuxtLink>
       </div>
@@ -148,14 +221,8 @@
 
 <script setup lang="ts">
 import { MagnifyingGlassIcon, ArrowRightIcon } from '@heroicons/vue/24/outline'
-import {
-  CodeBracketIcon,
-  SwatchIcon,
-  CubeIcon,
-  GlobeAltIcon,
-  ServerIcon,
-  DevicePhoneMobileIcon,
-} from '@heroicons/vue/24/outline'
+import type { Article, Category } from '~/types'
+import { getArticlePath, getCategoryIcon, defaultCategoryColor } from '~/utils/content'
 
 definePageMeta({
   layout: 'default',
@@ -165,101 +232,88 @@ useHead({
   title: 'หน้าแรก',
 })
 
+const config = useRuntimeConfig()
 const isSearchOpen = ref(false)
 
-// TODO: Fetch from API
-const featuredCategories = ref([
-  {
-    name: 'HTML',
-    slug: 'html',
-    icon: 'code',
-    color: '#E34C26',
-    description: 'โครงสร้างพื้นฐานของเว็บไซต์ รู้จักกับ Elements และ Tags ต่างๆ',
-    topics_count: 12,
-  },
-  {
-    name: 'CSS',
-    slug: 'css',
-    icon: 'swatch',
-    color: '#264DE4',
-    description: 'การตกแต่งหน้าเว็บ Layout และ Animation ต่างๆ',
-    topics_count: 18,
-  },
-  {
-    name: 'JavaScript',
-    slug: 'javascript',
-    icon: 'cube',
-    color: '#F7DF1E',
-    description: 'ภาษาโปรแกรมสำหรับเว็บ รู้จักกับ DOM และ APIs',
-    topics_count: 25,
-  },
-  {
-    name: 'Web APIs',
-    slug: 'web-apis',
-    icon: 'globe',
-    color: '#9B59B6',
-    description: 'APIs ต่างๆ ที่เบราว์เซอร์มีให้ เช่น Fetch, Storage, etc.',
-    topics_count: 15,
-  },
-  {
-    name: 'Vue.js',
-    slug: 'vue',
-    icon: 'cube',
-    color: '#42B883',
-    description: 'Framework สำหรับสร้าง UI ที่ได้รับความนิยมสูง',
-    topics_count: 20,
-  },
-  {
-    name: 'Node.js',
-    slug: 'nodejs',
-    icon: 'server',
-    color: '#339933',
-    description: 'JavaScript Runtime สำหรับ Backend Development',
-    topics_count: 14,
-  },
-])
-
-const featuredArticles = ref([
-  {
-    id: 1,
-    title: 'เริ่มต้นกับ HTML5',
-    slug: 'html/getting-started',
-    summary: 'เรียนรู้พื้นฐาน HTML5 สำหรับผู้เริ่มต้นที่ต้องการสร้างเว็บไซต์',
-    difficulty: 'beginner',
-    reading_time: 10,
-    topic: { name: 'HTML', slug: 'html' },
-  },
-  {
-    id: 2,
-    title: 'CSS Flexbox Layout',
-    slug: 'css/flexbox',
-    summary: 'ทำความเข้าใจ Flexbox สำหรับจัดวาง Layout อย่างยืดหยุ่น',
-    difficulty: 'intermediate',
-    reading_time: 15,
-    topic: { name: 'CSS', slug: 'css' },
-  },
-  {
-    id: 3,
-    title: 'JavaScript Async/Await',
-    slug: 'javascript/async-await',
-    summary: 'จัดการ Asynchronous Code ด้วย async/await อย่างมืออาชีพ',
-    difficulty: 'intermediate',
-    reading_time: 12,
-    topic: { name: 'JavaScript', slug: 'javascript' },
-  },
-])
-
-const getCategoryIcon = (icon: string) => {
-  const icons: Record<string, any> = {
-    code: CodeBracketIcon,
-    swatch: SwatchIcon,
-    cube: CubeIcon,
-    globe: GlobeAltIcon,
-    server: ServerIcon,
-    mobile: DevicePhoneMobileIcon,
+interface ApiSuccess<T> {
+  success: boolean
+  data: T
+  meta?: {
+    total: number
   }
-  return icons[icon] || CodeBracketIcon
 }
+
+interface HomepageData {
+  categories: Category[]
+  featured: Article[]
+  recent: Article[]
+  popular: Article[]
+  totalArticles: number
+}
+
+const { data: homepageData, pending: isLoading } = await useAsyncData<HomepageData>(
+  'homepage',
+  async () => {
+    const base = config.public.apiBase
+
+    const [categoriesRes, featuredRes, recentRes, popularRes, articlesMetaRes] = await Promise.all([
+      $fetch<ApiSuccess<{ categories: Category[] }>>(`${base}/categories`),
+      $fetch<ApiSuccess<{ articles: Article[] }>>(`${base}/articles/featured`, { params: { limit: 6 } }),
+      $fetch<ApiSuccess<{ articles: Article[] }>>(`${base}/articles/recent`, { params: { limit: 3 } }),
+      $fetch<ApiSuccess<{ articles: Article[] }>>(`${base}/articles/popular`, { params: { limit: 3 } }),
+      $fetch<ApiSuccess<Article[]>>(`${base}/articles`, { params: { per_page: 1 } }),
+    ])
+
+    return {
+      categories: categoriesRes.data.categories,
+      featured: featuredRes.data.articles,
+      recent: recentRes.data.articles,
+      popular: popularRes.data.articles,
+      totalArticles: articlesMetaRes.meta?.total ?? 0,
+    }
+  },
+)
+
+const categories = computed(() => homepageData.value?.categories ?? [])
+
+const featuredArticles = computed(() => {
+  const featured = homepageData.value?.featured ?? []
+  if (featured.length > 0) return featured
+
+  const recent = homepageData.value?.recent ?? []
+  return recent.slice(0, 6)
+})
+
+const recentArticles = computed(() => {
+  const recent = homepageData.value?.recent ?? []
+  const featuredIds = new Set(featuredArticles.value.map((a) => a.id))
+  return recent.filter((a) => !featuredIds.has(a.id)).slice(0, 3)
+})
+
+const popularArticles = computed(() => {
+  const popular = homepageData.value?.popular ?? []
+  const shownIds = new Set([
+    ...featuredArticles.value.map((a) => a.id),
+    ...recentArticles.value.map((a) => a.id),
+  ])
+  return popular.filter((a) => !shownIds.has(a.id)).slice(0, 3)
+})
+
+const stats = computed(() => ({
+  articles: homepageData.value?.totalArticles ?? 0,
+  topics: categories.value.reduce((sum, cat) => sum + (cat.topics_count ?? 0), 0),
+  categories: categories.value.length,
+}))
+
+const startLearningLink = computed(() => {
+  const first = categories.value[0]
+  return first ? `/docs/${first.slug}` : '/docs'
+})
+
+const ctaLink = computed(() => {
+  const first = featuredArticles.value[0]
+  return first ? getArticlePath(first) : startLearningLink.value
+})
 </script>
 
 <style scoped>

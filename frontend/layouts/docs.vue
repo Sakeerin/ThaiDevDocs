@@ -30,5 +30,6 @@
 </template>
 
 <script setup lang="ts">
-// Documentation layout with sidebar and TOC
+// Prefetch docs navigation tree for sidebar (shared cache via useDocsNavigation)
+useDocsNavigation()
 </script>

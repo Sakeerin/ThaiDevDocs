@@ -1,6 +1,6 @@
 <template>
   <NuxtLink
-    :to="`/docs/${article.slug}`"
+    :to="getArticlePath(article)"
     class="card p-6 hover:shadow-md hover:border-primary-200 dark:hover:border-primary-800 transition-all group"
   >
     <!-- Topic Badge -->
@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { ClockIcon, EyeIcon } from '@heroicons/vue/24/outline'
+import { getArticlePath } from '~/utils/content'
 
 interface Article {
   id: number
@@ -51,6 +52,9 @@ interface Article {
   topic?: {
     name: string
     slug: string
+    category?: {
+      slug: string
+    } | null
   }
 }
 
