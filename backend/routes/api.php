@@ -60,9 +60,11 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     });
 
     // Categories
-    Route::get('categories', [CategoryController::class, 'index']);
-    Route::get('categories/{slug}', [CategoryController::class, 'show']);
-    Route::get('categories/{slug}/topics', [CategoryController::class, 'topics']);
+    Route::middleware('cache.public:600')->group(function () {
+        Route::get('categories', [CategoryController::class, 'index']);
+        Route::get('categories/{slug}', [CategoryController::class, 'show']);
+        Route::get('categories/{slug}/topics', [CategoryController::class, 'topics']);
+    });
 
     // Topics
     Route::get('topics/{slug}', [TopicController::class, 'show']);
@@ -91,9 +93,11 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('search/popular', [SearchController::class, 'popular']);
 
     // Glossary
-    Route::get('glossary', [GlossaryController::class, 'index']);
-    Route::get('glossary/search', [GlossaryController::class, 'search']);
-    Route::get('glossary/{slug}', [GlossaryController::class, 'show']);
+    Route::middleware('cache.public:600')->group(function () {
+        Route::get('glossary', [GlossaryController::class, 'index']);
+        Route::get('glossary/search', [GlossaryController::class, 'search']);
+        Route::get('glossary/{slug}', [GlossaryController::class, 'show']);
+    });
 
     // Learning Paths
     Route::get('learning-paths', [LearningPathController::class, 'index']);

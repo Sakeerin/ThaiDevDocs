@@ -108,21 +108,23 @@ class AuthTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)
-            ->getJson('/api/v1/user');
+            ->getJson('/api/v1/auth/user');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'id',
-                    'name',
-                    'email',
+                    'user' => [
+                        'id',
+                        'name',
+                        'email',
+                    ],
                 ],
             ]);
     }
 
     public function test_unauthenticated_user_cannot_get_profile(): void
     {
-        $response = $this->getJson('/api/v1/user');
+        $response = $this->getJson('/api/v1/auth/user');
 
         $response->assertStatus(401);
     }

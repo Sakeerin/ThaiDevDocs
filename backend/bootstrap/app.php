@@ -18,8 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'role' => \App\Http\Middleware\EnsureUserRole::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'cache.public' => \App\Http\Middleware\CachePublicApiResponse::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

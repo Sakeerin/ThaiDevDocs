@@ -57,10 +57,11 @@ docker-compose -f docker-compose.prod.yml exec backend php artisan migrate --for
 docker-compose -f docker-compose.prod.yml exec backend php artisan tinker
 # >>> \App\Models\User::create(['name' => 'Admin', 'email' => 'admin@thaidevdocs.com', 'password' => bcrypt('secure_password'), 'role' => 'admin']);
 
-# Seed initial data (if available)
-docker-compose -f docker-compose.prod.yml exec backend php artisan db:seed --class=ProductionSeeder
+# Seed initial data
+docker-compose -f docker-compose.prod.yml exec backend php artisan db:seed
 
-# Sync Meilisearch indexes
+# Configure search indexes
+docker-compose -f docker-compose.prod.yml exec backend php artisan meilisearch:configure
 docker-compose -f docker-compose.prod.yml exec backend php artisan scout:sync-index-settings
 docker-compose -f docker-compose.prod.yml exec backend php artisan scout:import "App\Models\Article"
 docker-compose -f docker-compose.prod.yml exec backend php artisan scout:import "App\Models\Glossary"
@@ -203,13 +204,54 @@ services:
 - Check Horizon: `docker-compose -f docker-compose.prod.yml logs horizon`
 - Restart Horizon: `docker-compose -f docker-compose.prod.yml restart horizon`
 
+## Launch Checklist (Pre-Production)
+
+Use this checklist before pointing production traffic to the site.
+
+### Environment variables
+
+| Variable | Service | Required |
+|----------|---------|----------|
+| `APP_KEY` | Backend | ✅ |
+| `APP_URL` | Backend | ✅ |
+| `FRONTEND_URL` | Backend | ✅ (email verification links) |
+| `DB_*` | Backend | ✅ |
+| `REDIS_*` | Backend | ✅ |
+| `MEILISEARCH_*` | Backend | ✅ |
+| `MAIL_*` | Backend | ✅ (verification + digest) |
+| `NUXT_PUBLIC_API_BASE` | Frontend | ✅ |
+| `DB_ROOT_PASSWORD` | Docker Compose | ✅ |
+
+### Infrastructure
+
+- [ ] DNS A/AAAA records for `thaidevdocs.com`, `api.`, `admin.`
+- [ ] SSL certificates installed and auto-renewal (certbot timer)
+- [ ] `docker-compose -f docker-compose.prod.yml up --build -d` succeeds
+- [ ] `php artisan migrate --force` completed
+- [ ] `php artisan db:seed` completed (≥25 demo articles)
+- [ ] `php artisan meilisearch:configure` + `scout:import` completed
+- [ ] Daily MySQL backup cron configured (see Backup section)
+- [ ] Media/S3 backup strategy documented
+- [ ] Staging deploy smoke-tested (homepage, docs, search, login)
+
+### Post-deploy verification
+
+```bash
+curl -f https://api.thaidevdocs.com/up
+curl -f https://api.thaidevdocs.com/api/v1/categories
+curl -f "https://api.thaidevdocs.com/api/v1/search?q=html"
+```
+
+See also [SECURITY.md](./SECURITY.md) for the full security audit checklist.
+
 ## Security Checklist
 
+- [x] Rate limiting enabled (API + auth endpoints)
+- [x] Email verification flow
 - [ ] Strong passwords for database, Redis, and Meilisearch
 - [ ] SSL certificates properly configured
 - [ ] Firewall rules (only 80/443 exposed)
 - [ ] Regular security updates
 - [ ] Backup encryption
-- [ ] Rate limiting enabled
 - [ ] Admin 2FA enabled
 - [ ] Log monitoring configured

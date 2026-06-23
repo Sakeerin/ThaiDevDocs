@@ -146,7 +146,18 @@ GET /api/v1/articles?category_id=1&difficulty=beginner
 GET /api/v1/search?q=javascript
 ```
 
-See `backend/routes/api.php` and `DEVELOPMENT-CHECKLIST.md` for the full API surface.
+See `backend/routes/api.php`, `DEVELOPMENT-CHECKLIST.md`, and [SECURITY.md](./SECURITY.md) for the full API surface and security checklist.
+
+### Demo data
+
+After migrations, seed demo content (25 articles, glossary, learning paths, browsers):
+
+```bash
+cd backend
+php artisan db:seed
+```
+
+Demo accounts: `admin@thaidevdocs.local` / `password`, `user@thaidevdocs.local` / `password`
 
 ## Environment Variables
 
