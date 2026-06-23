@@ -24,8 +24,8 @@
                 <p class="text-xs text-gray-500">แต้มสะสม</p>
               </div>
               <div class="text-center">
-                <p class="text-2xl font-bold text-emerald-600">{{ user?.articles_count || 0 }}</p>
-                <p class="text-xs text-gray-500">บทความ</p>
+                <p class="text-2xl font-bold text-emerald-600">{{ profileStats.contributions_count || 0 }}</p>
+                <p class="text-xs text-gray-500">การมีส่วนร่วม</p>
               </div>
             </div>
           </div>
@@ -69,11 +69,12 @@
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ชื่อผู้ใช้</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">GitHub</label>
                 <input
-                  v-model="profileForm.username"
+                  v-model="profileForm.github_username"
                   type="text"
                   class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:text-white"
+                  placeholder="username"
                 />
               </div>
             </div>
@@ -176,15 +177,17 @@ definePageMeta({
 
 const route = useRoute()
 const { user, updateProfile: authUpdateProfile } = useAuth()
+const { $api } = useNuxtApp()
 
 const isSaving = ref(false)
 const isChangingPassword = ref(false)
+const profileStats = ref<{ bookmarks_count?: number; contributions_count?: number }>({})
 
 const profileForm = reactive({
   name: user.value?.name || '',
-  username: user.value?.username || '',
   bio: user.value?.bio || '',
   website: user.value?.website || '',
+  github_username: user.value?.github_username || '',
 })
 
 const passwordForm = reactive({
@@ -204,16 +207,30 @@ const navItems = [
 watch(user, (newUser) => {
   if (newUser) {
     profileForm.name = newUser.name || ''
-    profileForm.username = newUser.username || ''
     profileForm.bio = newUser.bio || ''
     profileForm.website = newUser.website || ''
+    profileForm.github_username = newUser.github_username || ''
   }
 }, { immediate: true })
+
+onMounted(async () => {
+  try {
+    const response = await $api<{ data: { user: { stats?: { contributions_count?: number; bookmarks_count?: number } } } }>('/user/profile')
+    profileStats.value = response.data.user.stats || {}
+  } catch (e) {
+    console.error('Failed to load profile stats:', e)
+  }
+})
 
 const updateProfile = async () => {
   isSaving.value = true
   try {
-    await authUpdateProfile(profileForm)
+    await authUpdateProfile({
+      name: profileForm.name,
+      bio: profileForm.bio,
+      website: profileForm.website,
+      github_username: profileForm.github_username,
+    })
   } catch (e) {
     console.error('Failed to update profile:', e)
   } finally {
@@ -229,8 +246,8 @@ const changePassword = async () => {
 
   isChangingPassword.value = true
   try {
-    await $fetch('/api/v1/user/password', {
-      method: 'PUT',
+    await $api('/user/password', {
+      method: 'PATCH',
       body: passwordForm,
     })
     alert('เปลี่ยนรหัสผ่านเรียบร้อยแล้ว')
@@ -238,7 +255,7 @@ const changePassword = async () => {
     passwordForm.password = ''
     passwordForm.password_confirmation = ''
   } catch (e: any) {
-    alert(e.data?.message || 'เกิดข้อผิดพลาด')
+    alert(e?.error?.message || e?.message || 'เกิดข้อผิดพลาด')
   } finally {
     isChangingPassword.value = false
   }

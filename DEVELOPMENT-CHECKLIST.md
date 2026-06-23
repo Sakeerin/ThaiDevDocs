@@ -312,18 +312,18 @@
 
 | # | งาน | ไฟล์ที่ต้องแก้/สร้าง | Priority |
 |---|-----|---------------------|----------|
-| 3.1 | สร้าง Glossary pages | `pages/glossary/index.vue`, `[term].vue` | 🔴 |
-| 3.2 | Verify + ปรับ Learning path enroll/progress | `learn/index.vue`, `learn/[slug].vue` | 🔴 |
-| 3.3 | สร้าง ProgressTracker component | `components/user/ProgressTracker.vue` | 🟡 |
-| 3.4 | ปรับ user profile/preferences ให้เชื่อม API ครบ | `profile.vue`, `preferences.vue` | 🟡 |
-| 3.5 | Suggest edit จากหน้าบทความ (contributor) | modal + article page | 🟡 |
-| 3.6 | สร้าง `stores/preferences.ts` + sync theme | stores + ThemeToggle | 🟡 |
-| 3.7 | Keyboard shortcut ⌘K search | `useKeyboardShortcuts.ts` | 🟢 |
+| 3.1 | สร้าง Glossary pages | `pages/glossary/index.vue`, `[term].vue` | ✅ |
+| 3.2 | Verify + ปรับ Learning path enroll/progress | `learn/index.vue`, `learn/[slug].vue` | ✅ |
+| 3.3 | สร้าง ProgressTracker component | `components/user/ProgressTracker.vue` | ✅ |
+| 3.4 | ปรับ user profile/preferences ให้เชื่อม API ครบ | `profile.vue`, `preferences.vue` | ✅ |
+| 3.5 | Suggest edit จากหน้าบทความ (contributor) | modal + article page | ✅ |
+| 3.6 | สร้าง `stores/preferences.ts` + sync theme | stores + ThemeToggle | ✅ |
+| 3.7 | Keyboard shortcut ⌘K search | `useKeyboardShortcuts.ts` | ✅ |
 
 **Definition of Done Sprint 3**
-- [ ] Glossary browse + search ใช้งานได้
-- [ ] Enroll learning path + ติดตาม progress
-- [ ] User preferences บันทึกลง API
+- [x] Glossary browse + search ใช้งานได้
+- [x] Enroll learning path + ติดตาม progress
+- [x] User preferences บันทึกลง API
 
 ---
 
@@ -404,11 +404,11 @@
 |--------|------|-------|------|---|--------|
 | S1 | Frontend Integration | 8 | 8 | 100% | ✅ เสร็จแล้ว |
 | S2 | Article Experience | 7 | 7 | 100% | ✅ เสร็จแล้ว |
-| S3 | Glossary & Learning | 7 | 0 | 0% | ⬜ ยังไม่เริ่ม |
+| S3 | Glossary & Learning | 7 | 7 | 100% | ✅ เสร็จแล้ว |
 | S4 | Admin Completion | 7 | 0 | 0% | ⬜ ยังไม่เริ่ม |
 | S5 | Backend & DevOps | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
 | S6 | Testing & Launch | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
-| **รวม** | | **45** | **15** | **33%** | |
+| **รวม** | | **45** | **22** | **49%** | |
 
 **Milestones**
 
@@ -492,13 +492,13 @@
 | 2.5 | ArticleMeta + ArticleRating components | S2 | ✅ | FE | 2h | — | ✅ |
 | 2.6 | Composables useBookmarks, useSearch | S2 | ✅ | FE | 3h | 1.5 | ✅ |
 | 2.7 | SEO meta + structured data | S2 | ✅ | FE | 3h | — | ✅ |
-| 3.1 | Glossary index + term pages | S3 | 🔴 | FE | 4h | — | ⬜ |
-| 3.2 | Learning path enroll + progress | S3 | 🔴 | FE | 4h | 1.1 | ⬜ |
-| 3.3 | ProgressTracker component | S3 | 🟡 | FE | 2h | 3.2 | ⬜ |
-| 3.4 | Profile + preferences API wiring | S3 | 🟡 | FE | 3h | 1.1 | ⬜ |
-| 3.5 | Suggest edit modal ในหน้า article | S3 | 🟡 | FE | 3h | 1.1 | ⬜ |
-| 3.6 | stores/preferences + theme sync | S3 | 🟡 | FE | 2h | 3.4 | ⬜ |
-| 3.7 | useKeyboardShortcuts ⌘K | S3 | 🟢 | FE | 1h | — | ⬜ |
+| 3.1 | Glossary index + term pages | S3 | ✅ | FE | 4h | — | ✅ |
+| 3.2 | Learning path enroll + progress | S3 | ✅ | FE | 4h | 1.1 | ✅ |
+| 3.3 | ProgressTracker component | S3 | ✅ | FE | 2h | 3.2 | ✅ |
+| 3.4 | Profile + preferences API wiring | S3 | ✅ | FE | 3h | 1.1 | ✅ |
+| 3.5 | Suggest edit modal ในหน้า article | S3 | ✅ | FE | 3h | 1.1 | ✅ |
+| 3.6 | stores/preferences + theme sync | S3 | ✅ | FE | 2h | 3.4 | ✅ |
+| 3.7 | useKeyboardShortcuts ⌘K | S3 | ✅ | FE | 1h | — | ✅ |
 | 4.1 | Admin LearningPath CRUD | S4 | 🔴 | Admin+BE | 6h | — | ⬜ |
 | 4.2 | Admin EditSuggestion review | S4 | 🔴 | Admin+BE | 5h | 5.3 | ⬜ |
 | 4.3 | Admin Contribution review | S4 | 🔴 | Admin+BE | 4h | 5.3 | ⬜ |
@@ -592,11 +592,11 @@ flowchart TD
 |--------|----------|-----|
 | S1 Frontend Integration | 8 / 8 | `██████████` 100% |
 | S2 Article Experience | 7 / 7 | `██████████` 100% |
-| S3 Glossary & Learning | 0 / 7 | `░░░░░░░░░░` 0% |
+| S3 Glossary & Learning | 7 / 7 | `██████████` 100% |
 | S4 Admin Completion | 0 / 7 | `░░░░░░░░░░` 0% |
 | S5 Backend & DevOps | 0 / 8 | `░░░░░░░░░░` 0% |
 | S6 Testing & Launch | 0 / 8 | `░░░░░░░░░░` 0% |
-| **TOTAL** | **15 / 45** | `████░░░░░░` **33%** |
+| **TOTAL** | **22 / 45** | `█████░░░░░` **49%** |
 
 ### 4.2 Sprint 1 — Frontend Integration (8/8) ✅
 
@@ -633,20 +633,20 @@ flowchart TD
 
 ---
 
-### 4.4 Sprint 3 — Glossary & Learning (0/7)
+### 4.4 Sprint 3 — Glossary & Learning (7/7) ✅
 
-- [ ] **3.1** Glossary pages — `pages/glossary/index.vue`, `[term].vue` *(new)*
-- [ ] **3.2** Learning path enroll/progress — `learn/*.vue`
-- [ ] **3.3** ProgressTracker — `components/user/ProgressTracker.vue` *(new)*
-- [ ] **3.4** Profile + preferences API — `user/profile.vue`, `preferences.vue`
-- [ ] **3.5** Suggest edit modal — article page
-- [ ] **3.6** `stores/preferences.ts` + theme sync
-- [ ] **3.7** `useKeyboardShortcuts.ts` — ⌘K search *(new)*
+- [x] **3.1** Glossary pages — `pages/glossary/index.vue`, `[term].vue` *(new)*
+- [x] **3.2** Learning path enroll/progress — `learn/*.vue`
+- [x] **3.3** ProgressTracker — `components/user/ProgressTracker.vue` *(new)*
+- [x] **3.4** Profile + preferences API — `user/profile.vue`, `preferences.vue`
+- [x] **3.5** Suggest edit modal — article page
+- [x] **3.6** `stores/preferences.ts` + theme sync
+- [x] **3.7** `useKeyboardShortcuts.ts` — ⌘K search *(new)*
 
 **DoD Sprint 3**
-- [ ] Glossary browse + search ใช้งานได้
-- [ ] Enroll learning path + ติดตาม progress
-- [ ] User preferences บันทึกลง API
+- [x] Glossary browse + search ใช้งานได้
+- [x] Enroll learning path + ติดตาม progress
+- [x] User preferences บันทึกลง API
 
 ---
 

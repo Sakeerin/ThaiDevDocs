@@ -109,6 +109,7 @@ Route::prefix('v1')->group(function () {
         // User Profile
         Route::get('user/profile', [UserController::class, 'profile']);
         Route::patch('user/profile', [UserController::class, 'updateProfile']);
+        Route::get('user/preferences', [UserController::class, 'getPreferences']);
         Route::patch('user/preferences', [UserController::class, 'updatePreferences']);
         Route::patch('user/password', [UserController::class, 'updatePassword']);
 
@@ -145,6 +146,7 @@ Route::prefix('v1')->group(function () {
 
         // Learning Paths (Authenticated)
         Route::post('learning-paths/{slug}/enroll', [LearningPathController::class, 'enroll']);
+        Route::get('learning-paths/{slug}/progress', [LearningPathController::class, 'myProgress']);
         Route::patch('learning-paths/{slug}/progress', [LearningPathController::class, 'updateProgress']);
         Route::get('my-learning', [LearningPathController::class, 'myLearning']);
 

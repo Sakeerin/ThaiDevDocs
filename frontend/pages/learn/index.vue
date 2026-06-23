@@ -12,34 +12,30 @@
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">เส้นทางของฉัน</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <NuxtLink
-          v-for="enrollment in myPaths"
-          :key="enrollment.id"
-          :to="`/learn/${enrollment.learning_path.slug}`"
+          v-for="entry in myPaths"
+          :key="entry.path?.id"
+          :to="`/learn/${entry.path?.slug}`"
           class="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-6 hover:shadow-xl hover:border-primary-300 dark:hover:border-primary-700 transition-all"
         >
           <div class="flex items-start justify-between mb-4">
-            <div :class="['w-12 h-12 rounded-xl flex items-center justify-center text-xl', getDifficultyBg(enrollment.learning_path.difficulty)]">
-              {{ enrollment.learning_path.icon || '📚' }}
+            <div :class="['w-12 h-12 rounded-xl flex items-center justify-center text-xl text-white', getDifficultyBg(entry.path?.difficulty || '')]">
+              📚
             </div>
-            <span class="text-sm text-gray-500">
-              {{ enrollment.progress }}% เสร็จสิ้น
+            <span v-if="entry.is_completed" class="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
+              จบแล้ว
             </span>
           </div>
-          
+
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">
-            {{ enrollment.learning_path.name }}
+            {{ entry.path?.title }}
           </h3>
-          
-          <div class="mt-4 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-            <div
-              class="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all"
-              :style="{ width: `${enrollment.progress}%` }"
-            />
-          </div>
-          
-          <p class="mt-3 text-sm text-gray-500">
-            {{ enrollment.completed_items.length }} / {{ enrollment.learning_path.items_count }} บทเรียน
-          </p>
+
+          <ProgressTracker
+            class="mt-4"
+            :percentage="entry.progress_percentage"
+            :completed="Math.round((entry.progress_percentage / 100) * (entry.path?.total_items || 0))"
+            :total="entry.path?.total_items || 0"
+          />
         </NuxtLink>
       </div>
     </div>
@@ -49,69 +45,70 @@
       <button
         v-for="filter in difficultyFilters"
         :key="filter.value"
-        @click="selectedDifficulty = filter.value"
+        type="button"
         :class="[
           'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
           selectedDifficulty === filter.value
             ? filter.activeClass
-            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700'
+            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700',
         ]"
+        @click="selectedDifficulty = filter.value"
       >
         {{ filter.label }}
       </button>
     </div>
 
     <!-- Learning Paths -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-if="pending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-for="i in 6" :key="i" class="h-64 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <NuxtLink
         v-for="path in filteredPaths"
         :key="path.id"
         :to="`/learn/${path.slug}`"
         class="group bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-xl hover:border-primary-300 dark:hover:border-primary-700 transition-all"
       >
-        <!-- Header Image -->
-        <div :class="['h-32 flex items-center justify-center text-4xl', getDifficultyBg(path.difficulty)]">
-          {{ path.icon || '📚' }}
+        <div :class="['h-32 flex items-center justify-center text-4xl text-white', getDifficultyBg(path.difficulty)]">
+          📚
         </div>
-        
+
         <div class="p-6">
-          <!-- Badges -->
           <div class="flex items-center gap-2 mb-3">
             <span :class="getDifficultyClass(path.difficulty)">
               {{ getDifficultyLabel(path.difficulty) }}
             </span>
             <span class="flex items-center gap-1 text-sm text-gray-500">
-              <Icon name="heroicons:clock" class="w-4 h-4" />
-              {{ path.estimated_hours }} ชั่วโมง
+              <ClockIcon class="w-4 h-4" />
+              {{ path.estimated_hours || '?' }} ชั่วโมง
             </span>
           </div>
-          
+
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 transition-colors">
-            {{ path.name }}
+            {{ path.title }}
           </h3>
-          
+
           <p class="mt-2 text-gray-500 dark:text-gray-400 line-clamp-2">
             {{ path.description }}
           </p>
-          
-          <!-- Stats -->
+
           <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
             <span class="flex items-center gap-1">
-              <Icon name="heroicons:document-text" class="w-4 h-4" />
-              {{ path.items_count }} บทเรียน
+              <DocumentTextIcon class="w-4 h-4" />
+              {{ path.items_count || 0 }} บทเรียน
             </span>
             <span class="flex items-center gap-1">
-              <Icon name="heroicons:users" class="w-4 h-4" />
-              {{ formatNumber(path.enrollments_count) }} คนเรียน
+              <UsersIcon class="w-4 h-4" />
+              {{ formatNumber(path.enrollment_count || 0) }} คนเรียน
             </span>
           </div>
         </div>
       </NuxtLink>
     </div>
 
-    <!-- Empty State -->
-    <div v-if="filteredPaths.length === 0" class="text-center py-16">
-      <Icon name="heroicons:academic-cap" class="w-16 h-16 mx-auto text-gray-300 dark:text-slate-600 mb-4" />
+    <div v-if="!pending && filteredPaths.length === 0" class="text-center py-16">
+      <AcademicCapIcon class="w-16 h-16 mx-auto text-gray-300 dark:text-slate-600 mb-4" />
       <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-2">ไม่พบเส้นทางการเรียนรู้</h3>
       <p class="text-gray-500 dark:text-gray-400">ลองเลือกตัวกรองอื่น</p>
     </div>
@@ -119,12 +116,26 @@
 </template>
 
 <script setup lang="ts">
+import {
+  ClockIcon,
+  DocumentTextIcon,
+  UsersIcon,
+  AcademicCapIcon,
+} from '@heroicons/vue/24/outline'
+import type { LearningPathSummary, MyLearningEntry } from '~/composables/useLearningPath'
+
 const { isAuthenticated } = useAuth()
+const { fetchPaths, fetchMyLearning } = useLearningPath()
 const config = useRuntimeConfig()
 
-const paths = ref<any[]>([])
-const myPaths = ref<any[]>([])
+useHead({
+  title: 'เส้นทางการเรียนรู้',
+})
+
+const paths = ref<LearningPathSummary[]>([])
+const myPaths = ref<MyLearningEntry[]>([])
 const selectedDifficulty = ref('')
+const pending = ref(true)
 
 const difficultyFilters = [
   { value: '', label: 'ทั้งหมด', activeClass: 'bg-primary-600 text-white' },
@@ -139,22 +150,21 @@ const filteredPaths = computed(() => {
 })
 
 onMounted(async () => {
-  // Fetch all learning paths
+  pending.value = true
   try {
-    const response = await $fetch<any>(`${config.public.apiBase}/learning-paths`)
-    paths.value = response.data
+    const response = await $fetch<{ data: LearningPathSummary[] }>(`${config.public.apiBase}/learning-paths`)
+    paths.value = response.data || []
   } catch (e) {
     console.error('Failed to fetch learning paths:', e)
+  } finally {
+    pending.value = false
   }
 
-  // Fetch user's enrolled paths
   if (isAuthenticated.value) {
     try {
-      const { $api } = useNuxtApp()
-      const { data } = await $api('/user/learning-paths')
-      myPaths.value = data
+      myPaths.value = await fetchMyLearning()
     } catch (e) {
-      console.error('Failed to fetch my paths:', e)
+      console.error('Failed to fetch my learning paths:', e)
     }
   }
 })
@@ -188,7 +198,7 @@ function getDifficultyBg(difficulty: string) {
 
 function formatNumber(num: number) {
   if (!num) return '0'
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
   return num.toString()
 }
 </script>

@@ -117,20 +117,13 @@ import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/out
 const isMobileMenuOpen = ref(false)
 const isSearchOpen = ref(false)
 const { isAuthenticated, isAuthReady } = useAuth()
+const { register } = useKeyboardShortcuts()
 
 const openSearch = () => {
   isSearchOpen.value = true
 }
 
-// Keyboard shortcut for search
-onMounted(() => {
-  const handleKeydown = (e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault()
-      openSearch()
-    }
-  }
-  window.addEventListener('keydown', handleKeydown)
-  onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
+register('search', () => {
+  openSearch()
 })
 </script>

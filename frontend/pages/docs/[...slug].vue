@@ -23,6 +23,31 @@
       <div v-else-if="article" class="container max-w-4xl mx-auto px-4 py-8 lg:py-12">
         <ArticleMeta :article="article" />
 
+        <div
+          v-if="learningPathSlug"
+          class="mb-6 p-4 rounded-xl border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20"
+        >
+          <div class="flex items-center justify-between gap-4 flex-wrap">
+            <p class="text-sm text-primary-800 dark:text-primary-200">
+              กำลังเรียนในเส้นทางการเรียนรู้
+            </p>
+            <NuxtLink :to="`/learn/${learningPathSlug}`" class="text-sm font-medium text-primary-600 hover:underline">
+              กลับไปเส้นทาง
+            </NuxtLink>
+          </div>
+        </div>
+
+        <div v-if="canSuggestEdit" class="mb-6 flex justify-end">
+          <button
+            type="button"
+            class="btn-secondary flex items-center gap-2"
+            @click="showSuggestEdit = true"
+          >
+            <PencilSquareIcon class="w-5 h-5" />
+            แนะนำการแก้ไข
+          </button>
+        </div>
+
         <ArticleContent :content="article.content_html || ''" />
 
         <!-- Code Examples -->
@@ -83,19 +108,42 @@
           :article-slug="article.slug"
           :comments-count="article.comments_count"
         />
+
+        <SuggestEditModal
+          v-model="showSuggestEdit"
+          :article-slug="article.slug"
+          :article-title="article.title"
+          @submitted="onSuggestEditSubmitted"
+        />
       </div>
     </NuxtLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import { PencilSquareIcon } from '@heroicons/vue/24/outline'
 import { getArticleSlugFromRoute } from '~/utils/article'
 import { getArticlePath } from '~/utils/content'
 
 const route = useRoute()
 const config = useRuntimeConfig()
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, user } = useAuth()
 const { startTracking, stopTracking } = useReadingHistory()
+const { markItemComplete } = useLearningPath()
+const preferencesStore = usePreferencesStore()
+
+const showSuggestEdit = ref(false)
+const learningItemMarked = ref(false)
+const learningPathSlug = computed(() => route.query.learning_path as string | undefined)
+const learningPathItemId = computed(() => {
+  const raw = route.query.item_id
+  return raw ? Number(raw) : null
+})
+
+const canSuggestEdit = computed(() => {
+  if (!isAuthenticated.value || !user.value) return false
+  return ['contributor', 'admin', 'super_admin'].includes(user.value.role)
+})
 
 const articleSlug = computed(() => getArticleSlugFromRoute(route.params.slug))
 const siteUrl = config.public.siteUrl || 'http://localhost:3000'
@@ -182,16 +230,36 @@ useHead(() => {
 watch(
   [article, isAuthenticated],
   ([currentArticle, authed]) => {
-    if (currentArticle?.id && authed) {
+    if (currentArticle?.id && authed && preferencesStore.local.save_reading_history) {
       startTracking(currentArticle.id)
     } else {
       stopTracking()
+    }
+
+    if (currentArticle && authed && learningPathSlug.value && learningPathItemId.value) {
+      markLearningItemComplete()
     }
   },
   { immediate: true },
 )
 
+async function markLearningItemComplete() {
+  if (learningItemMarked.value || !learningPathSlug.value || !learningPathItemId.value) return
+
+  learningItemMarked.value = true
+  try {
+    await markItemComplete(learningPathSlug.value, learningPathItemId.value)
+  } catch {
+    learningItemMarked.value = false
+  }
+}
+
+function onSuggestEditSubmitted() {
+  alert('ส่งคำแนะนำการแก้ไขเรียบร้อยแล้ว ขอบคุณ!')
+}
+
 watch(articleSlug, () => {
   stopTracking()
+  learningItemMarked.value = false
 })
 </script>

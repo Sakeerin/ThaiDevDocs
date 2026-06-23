@@ -64,6 +64,19 @@ class UserController extends Controller
     }
 
     /**
+     * Get user preferences.
+     */
+    public function getPreferences(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $preferences = $user->preferences ?? UserPreference::create(['user_id' => $user->id]);
+
+        return $this->success([
+            'preferences' => $preferences,
+        ]);
+    }
+
+    /**
      * Update user preferences.
      */
     public function updatePreferences(Request $request): JsonResponse

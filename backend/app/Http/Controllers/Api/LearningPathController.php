@@ -211,9 +211,59 @@ class LearningPathController extends Controller
         }
 
         return $this->success([
-            'progress_percentage' => $progressPercentage,
-            'is_completed' => $progressPercentage >= 100,
+            'progress' => [
+                'started_at' => $progress->started_at?->toISOString(),
+                'progress_percentage' => $progressPercentage,
+                'is_completed' => $progressPercentage >= 100,
+                'completed_item_ids' => \DB::table('user_completed_items')
+                    ->where('user_id', $request->user()->id)
+                    ->whereIn('learning_path_item_id', $path->items()->pluck('id'))
+                    ->pluck('learning_path_item_id')
+                    ->values()
+                    ->all(),
+            ],
         ], 'Progress updated.');
+    }
+
+    /**
+     * Get authenticated user's progress for a learning path.
+     */
+    public function myProgress(Request $request, string $slug): JsonResponse
+    {
+        $path = LearningPath::where('slug', $slug)->published()->first();
+
+        if (!$path) {
+            return $this->notFound('Learning path not found.');
+        }
+
+        $progress = UserLearningProgress::where('user_id', $request->user()->id)
+            ->where('learning_path_id', $path->id)
+            ->first();
+
+        if (!$progress) {
+            return $this->success([
+                'enrolled' => false,
+            ]);
+        }
+
+        $completedItemIds = \DB::table('user_completed_items')
+            ->where('user_id', $request->user()->id)
+            ->whereIn('learning_path_item_id', $path->items()->pluck('id'))
+            ->pluck('learning_path_item_id')
+            ->values()
+            ->all();
+
+        return $this->success([
+            'enrolled' => true,
+            'progress' => [
+                'started_at' => $progress->started_at?->toISOString(),
+                'completed_at' => $progress->completed_at?->toISOString(),
+                'progress_percentage' => $progress->progress_percentage,
+                'current_item_id' => $progress->current_item_id,
+                'completed_item_ids' => $completedItemIds,
+                'is_completed' => $progress->completed_at !== null,
+            ],
+        ]);
     }
 
     /**
