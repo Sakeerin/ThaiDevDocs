@@ -107,16 +107,19 @@ export interface ReadingHistory {
 
 export interface Comment {
   id: number
-  article_id: number
-  user_id: number
-  parent_id?: number
   content: string
-  status: 'pending' | 'approved' | 'rejected' | 'spam'
-  upvotes_count: number
-  downvotes_count: number
+  content_html?: string
+  is_pinned?: boolean
+  upvote_count: number
   created_at: string
   updated_at: string
-  user?: User
+  is_author?: boolean
+  user_vote?: 'up' | 'down'
+  user?: {
+    id: number
+    name: string
+    avatar?: string | null
+  }
   replies?: Comment[]
 }
 

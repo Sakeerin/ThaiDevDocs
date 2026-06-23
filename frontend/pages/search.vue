@@ -229,31 +229,30 @@ const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
 
-const query = ref((route.query.q as string) || '')
-const results = ref<any[]>([])
-const isLoading = ref(false)
-const totalResults = ref(0)
-const searchTime = ref(0)
-const currentPage = ref(1)
-const perPage = 20
+const {
+  query,
+  results,
+  isLoading,
+  totalResults,
+  searchTime,
+  currentPage,
+  perPage,
+  sortBy,
+  filters,
+  totalPages,
+  search,
+  fetchPopularSearches,
+  reset,
+} = useSearch()
 
-const filters = reactive({
-  category: '',
-  difficulty: '',
-  type: '',
-})
-
-const sortBy = ref('relevance')
+query.value = (route.query.q as string) || ''
 
 const categories = ref<any[]>([])
 const recentSearches = ref<string[]>([])
 const suggestions = ['JavaScript เบื้องต้น', 'CSS Flexbox', 'React Hooks', 'TypeScript']
-const popularSearches = ['JavaScript', 'CSS Grid', 'Vue.js', 'HTML5', 'React', 'TypeScript', 'Node.js', 'API']
-
-const totalPages = computed(() => Math.ceil(totalResults.value / perPage))
+const popularSearches = ref<string[]>(['JavaScript', 'CSS Grid', 'Vue.js', 'HTML5', 'React', 'TypeScript', 'Node.js', 'API'])
 
 onMounted(async () => {
-  // Load categories
   try {
     const response = await $fetch<any>(`${config.public.apiBase}/categories`)
     categories.value = response.data
@@ -261,13 +260,16 @@ onMounted(async () => {
     console.error('Failed to load categories:', e)
   }
 
-  // Load recent searches from localStorage
   const stored = localStorage.getItem('recent-searches')
   if (stored) {
     recentSearches.value = JSON.parse(stored)
   }
 
-  // Perform initial search if query exists
+  const popular = await fetchPopularSearches()
+  if (popular.length) {
+    popularSearches.value = popular
+  }
+
   if (query.value) {
     performSearch()
   }
@@ -280,40 +282,13 @@ const debouncedSearch = useDebounceFn(() => {
 
 async function performSearch() {
   if (!query.value.trim()) {
-    results.value = []
+    reset()
     return
   }
 
-  isLoading.value = true
-  try {
-    const params: any = {
-      q: query.value,
-      page: currentPage.value,
-      per_page: perPage,
-    }
-
-    if (filters.category) params.category_id = filters.category
-    if (filters.difficulty) params.difficulty = filters.difficulty
-    if (filters.type) params.type = filters.type
-    if (sortBy.value !== 'relevance') params.sort = sortBy.value
-
-    const response = await $fetch<any>(`${config.public.apiBase}/search`, { params })
-    
-    results.value = response.data?.hits || []
-    totalResults.value = response.data?.estimatedTotalHits || results.value.length
-    searchTime.value = response.data?.processingTimeMs || 0
-
-    // Save to recent searches
-    saveRecentSearch(query.value)
-
-    // Update URL
-    router.replace({ query: { q: query.value, ...filters } })
-  } catch (error) {
-    console.error('Search error:', error)
-    results.value = []
-  } finally {
-    isLoading.value = false
-  }
+  await search()
+  saveRecentSearch(query.value)
+  router.replace({ query: { q: query.value, ...filters } })
 }
 
 function searchSuggestion(term: string) {
@@ -323,8 +298,7 @@ function searchSuggestion(term: string) {
 }
 
 function clearSearch() {
-  query.value = ''
-  results.value = []
+  reset()
   router.replace({ query: {} })
 }
 

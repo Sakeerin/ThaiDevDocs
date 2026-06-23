@@ -28,6 +28,7 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'sitemap', type: 'application/xml', href: process.env.NUXT_PUBLIC_SITEMAP_URL || 'http://localhost:8000/storage/sitemap.xml' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         { 
@@ -49,6 +50,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api/v1',
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      sitemapUrl: process.env.NUXT_PUBLIC_SITEMAP_URL || 'http://localhost:8000/storage/sitemap.xml',
     },
   },
 

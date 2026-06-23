@@ -71,6 +71,7 @@ Route::prefix('v1')->group(function () {
     Route::get('articles/{slug}/revisions', [ArticleController::class, 'revisions']);
     Route::get('articles/{slug}/examples', [ArticleController::class, 'examples']);
     Route::get('articles/{slug}/compatibility', [ArticleController::class, 'compatibility']);
+    Route::get('articles/{slug}/comments', [CommentController::class, 'index']);
 
     // Tags
     Route::get('tags', [TagController::class, 'index']);
@@ -137,7 +138,6 @@ Route::prefix('v1')->group(function () {
         Route::post('articles/{slug}/suggest-edit', [ArticleController::class, 'suggestEdit']);
 
         // Comments
-        Route::get('articles/{slug}/comments', [CommentController::class, 'index']);
         Route::post('articles/{slug}/comments', [CommentController::class, 'store']);
         Route::patch('comments/{id}', [CommentController::class, 'update']);
         Route::delete('comments/{id}', [CommentController::class, 'destroy']);

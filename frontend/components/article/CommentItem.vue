@@ -15,12 +15,6 @@
           <span class="font-medium text-gray-900 dark:text-white">
             {{ comment.user?.name || 'ผู้ใช้' }}
           </span>
-          <span v-if="comment.user?.role === 'admin'" class="px-2 py-0.5 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 rounded-full">
-            ผู้ดูแล
-          </span>
-          <span v-if="comment.user?.role === 'contributor'" class="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full">
-            ผู้ร่วมเขียน
-          </span>
           <span class="text-sm text-gray-500">
             {{ formatTimeAgo(comment.created_at) }}
           </span>
@@ -39,14 +33,17 @@
             />
             <div class="mt-2 flex gap-2">
               <button
+                type="button"
+                class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg disabled:opacity-50"
+                :disabled="isSaving"
                 @click="saveEdit"
-                class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg"
               >
-                บันทึก
+                {{ isSaving ? 'กำลังบันทึก...' : 'บันทึก' }}
               </button>
               <button
-                @click="cancelEdit"
+                type="button"
                 class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 text-sm rounded-lg"
+                @click="cancelEdit"
               >
                 ยกเลิก
               </button>
@@ -62,23 +59,22 @@
           <!-- Votes -->
           <div class="flex items-center gap-1">
             <button
+              type="button"
+              class="p-1.5 rounded-lg transition-colors text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
               @click="$emit('vote', comment.id, 'up')"
-              :class="[
-                'p-1.5 rounded-lg transition-colors',
-                'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
-              ]"
             >
               <Icon name="heroicons:chevron-up" class="w-5 h-5" />
             </button>
-            <span class="text-sm font-medium" :class="voteScore > 0 ? 'text-emerald-600' : voteScore < 0 ? 'text-red-500' : 'text-gray-500'">
-              {{ voteScore }}
+            <span
+              class="text-sm font-medium"
+              :class="comment.upvote_count > 0 ? 'text-emerald-600' : 'text-gray-500'"
+            >
+              {{ comment.upvote_count }}
             </span>
             <button
+              type="button"
+              class="p-1.5 rounded-lg transition-colors text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               @click="$emit('vote', comment.id, 'down')"
-              :class="[
-                'p-1.5 rounded-lg transition-colors',
-                'text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
-              ]"
             >
               <Icon name="heroicons:chevron-down" class="w-5 h-5" />
             </button>
@@ -87,49 +83,43 @@
           <!-- Reply -->
           <button
             v-if="depth < 3"
-            @click="showReplyForm = !showReplyForm"
+            type="button"
             class="flex items-center gap-1 text-sm text-gray-500 hover:text-primary-600"
+            @click="showReplyForm = !showReplyForm"
           >
             <Icon name="heroicons:chat-bubble-left" class="w-4 h-4" />
             ตอบกลับ
           </button>
 
           <!-- More Actions -->
-          <div class="relative ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+          <div v-if="comment.is_author" class="relative ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              @click="showMenu = !showMenu"
+              type="button"
               class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+              @click="showMenu = !showMenu"
             >
               <Icon name="heroicons:ellipsis-horizontal" class="w-5 h-5" />
             </button>
-            
+
             <div
               v-if="showMenu"
               class="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg z-10"
             >
               <button
-                v-if="isOwner"
-                @click="startEdit"
+                type="button"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 first:rounded-t-xl"
+                @click="startEdit"
               >
                 <Icon name="heroicons:pencil" class="w-4 h-4 inline-block mr-2" />
                 แก้ไข
               </button>
               <button
-                v-if="isOwner"
+                type="button"
+                class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-xl"
                 @click="$emit('delete', comment.id)"
-                class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <Icon name="heroicons:trash" class="w-4 h-4 inline-block mr-2" />
                 ลบ
-              </button>
-              <button
-                v-if="!isOwner"
-                @click="$emit('report', comment.id)"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 last:rounded-b-xl"
-              >
-                <Icon name="heroicons:flag" class="w-4 h-4 inline-block mr-2" />
-                รายงาน
               </button>
             </div>
           </div>
@@ -145,15 +135,17 @@
           />
           <div class="mt-2 flex justify-end gap-2">
             <button
-              @click="showReplyForm = false"
+              type="button"
               class="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 text-sm rounded-lg"
+              @click="showReplyForm = false"
             >
               ยกเลิก
             </button>
             <button
-              @click="submitReply"
+              type="button"
               :disabled="!replyContent.trim()"
               class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg disabled:opacity-50"
+              @click="submitReply"
             >
               ตอบกลับ
             </button>
@@ -166,13 +158,12 @@
             v-for="reply in comment.replies"
             :key="reply.id"
             :comment="reply"
-            :article-id="articleId"
             :current-user="currentUser"
             :depth="depth + 1"
-            @reply="$emit('reply', $event.parentId, $event.content)"
-            @vote="$emit('vote', $event.commentId, $event.type)"
-            @delete="$emit('delete', $event)"
-            @report="$emit('report', $event)"
+            @reply="(parentId, content) => $emit('reply', parentId, content)"
+            @vote="(commentId, type) => $emit('vote', commentId, type)"
+            @delete="(commentId) => $emit('delete', commentId)"
+            @updated="(updated) => $emit('updated', updated)"
           />
         </div>
       </div>
@@ -185,7 +176,6 @@ import type { Comment, User } from '~/types'
 
 const props = withDefaults(defineProps<{
   comment: Comment
-  articleId: number
   currentUser: User | null
   depth?: number
 }>(), {
@@ -193,25 +183,20 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
-  'reply': [parentId: number, content: string]
-  'vote': [commentId: number, type: 'up' | 'down']
-  'delete': [commentId: number]
-  'report': [commentId: number]
+  reply: [parentId: number, content: string]
+  vote: [commentId: number, type: 'up' | 'down']
+  delete: [commentId: number]
+  updated: [comment: Comment]
 }>()
+
+const { $api } = useNuxtApp()
 
 const showReplyForm = ref(false)
 const replyContent = ref('')
 const showMenu = ref(false)
 const isEditing = ref(false)
+const isSaving = ref(false)
 const editContent = ref('')
-
-const voteScore = computed(() => {
-  return (props.comment.upvotes_count || 0) - (props.comment.downvotes_count || 0)
-})
-
-const isOwner = computed(() => {
-  return props.currentUser?.id === props.comment.user_id
-})
 
 function submitReply() {
   if (!replyContent.value.trim()) return
@@ -232,9 +217,21 @@ function cancelEdit() {
 }
 
 async function saveEdit() {
-  // This would typically call an API to update the comment
-  // For now, just close the edit form
-  isEditing.value = false
+  if (!editContent.value.trim()) return
+
+  isSaving.value = true
+  try {
+    const response = await $api<{ data: { comment: Comment } }>(`/comments/${props.comment.id}`, {
+      method: 'PATCH',
+      body: { content: editContent.value },
+    })
+    emit('updated', response.data.comment)
+    isEditing.value = false
+  } catch (e: any) {
+    alert(e?.error?.message || e?.message || 'ไม่สามารถแก้ไขความคิดเห็นได้')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 function getAvatarColor(name: string) {
@@ -256,12 +253,12 @@ function formatTimeAgo(date: string) {
   const now = new Date()
   const then = new Date(date)
   const seconds = Math.floor((now.getTime() - then.getTime()) / 1000)
-  
+
   if (seconds < 60) return 'เมื่อสักครู่'
   if (seconds < 3600) return `${Math.floor(seconds / 60)} นาทีที่แล้ว`
   if (seconds < 86400) return `${Math.floor(seconds / 3600)} ชั่วโมงที่แล้ว`
   if (seconds < 604800) return `${Math.floor(seconds / 86400)} วันที่แล้ว`
-  
+
   return then.toLocaleDateString('th-TH', {
     year: 'numeric',
     month: 'short',
@@ -269,7 +266,6 @@ function formatTimeAgo(date: string) {
   })
 }
 
-// Close menu when clicking outside
 onMounted(() => {
   document.addEventListener('click', (e) => {
     if (!(e.target as HTMLElement).closest('.relative')) {

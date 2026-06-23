@@ -140,7 +140,7 @@ class ArticleController extends Controller
         }
 
         return $this->success([
-            'article' => $this->formatArticle($article),
+            'article' => $this->formatArticle($article, includeNavigation: true),
         ]);
     }
 
@@ -412,9 +412,9 @@ class ArticleController extends Controller
     /**
      * Format full article details.
      */
-    protected function formatArticle(Article $article): array
+    protected function formatArticle(Article $article, bool $includeNavigation = false): array
     {
-        return [
+        $data = [
             'id' => $article->id,
             'title' => $article->title,
             'slug' => $article->slug,
@@ -428,6 +428,7 @@ class ArticleController extends Controller
             'view_count' => $article->view_count,
             'is_featured' => $article->is_featured,
             'allow_comments' => $article->allow_comments,
+            'comments_count' => $article->comments()->approved()->count(),
             'published_at' => $article->published_at?->toISOString(),
             'updated_at' => $article->updated_at?->toISOString(),
             'current_version' => $article->current_version,
@@ -470,6 +471,55 @@ class ArticleController extends Controller
             'meta_title' => $article->meta_title,
             'meta_description' => $article->meta_description,
             'canonical_url' => $article->canonical_url,
+        ];
+
+        if ($includeNavigation) {
+            $data['navigation'] = $this->getArticleNavigation($article);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get previous/next articles within the same topic.
+     */
+    protected function getArticleNavigation(Article $article): array
+    {
+        $base = Article::where('topic_id', $article->topic_id)->published();
+
+        $prev = (clone $base)
+            ->where(function ($query) use ($article) {
+                $query->where('published_at', '<', $article->published_at)
+                    ->orWhere(function ($inner) use ($article) {
+                        $inner->where('published_at', $article->published_at)
+                            ->where('id', '<', $article->id);
+                    });
+            })
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->first(['id', 'title', 'slug']);
+
+        $next = (clone $base)
+            ->where(function ($query) use ($article) {
+                $query->where('published_at', '>', $article->published_at)
+                    ->orWhere(function ($inner) use ($article) {
+                        $inner->where('published_at', $article->published_at)
+                            ->where('id', '>', $article->id);
+                    });
+            })
+            ->orderBy('published_at')
+            ->orderBy('id')
+            ->first(['id', 'title', 'slug']);
+
+        $formatNav = fn (?Article $item) => $item ? [
+            'id' => $item->id,
+            'title' => $item->title,
+            'slug' => $item->slug,
+        ] : null;
+
+        return [
+            'prev' => $formatNav($prev),
+            'next' => $formatNav($next),
         ];
     }
 }

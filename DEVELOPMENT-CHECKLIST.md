@@ -291,18 +291,18 @@
 
 | # | งาน | ไฟล์ที่ต้องแก้/สร้าง | Priority |
 |---|-----|---------------------|----------|
-| 2.1 | Wire CommentSection ในหน้า article | `pages/docs/[...slug].vue`, `CommentSection.vue` | 🔴 |
-| 2.2 | สร้าง BrowserCompat component + แสดง compatibility | `components/article/BrowserCompat.vue`, article page | 🔴 |
-| 2.3 | Wire CodePlayground สำหรับ runnable examples | `CodePlayground.vue`, article page | 🔴 |
-| 2.4 | Article prev/next navigation | `ArticleNavigation.vue` (ใหม่) | 🟡 |
-| 2.5 | แยก/ปรับ ArticleMeta, ArticleRating | components ใหม่ | 🟡 |
-| 2.6 | สร้าง composables: `useBookmarks`, `useSearch` | composables/ | 🟡 |
-| 2.7 | SEO: meta tags, structured data, sitemap link | `nuxt.config.ts`, article page | 🟡 |
+| 2.1 | Wire CommentSection ในหน้า article | `pages/docs/[...slug].vue`, `CommentSection.vue` | ✅ |
+| 2.2 | สร้าง BrowserCompat component + แสดง compatibility | `components/article/BrowserCompat.vue`, article page | ✅ |
+| 2.3 | Wire CodePlayground สำหรับ runnable examples | `CodePlayground.vue`, article page | ✅ |
+| 2.4 | Article prev/next navigation | `ArticleNavigation.vue` (ใหม่) | ✅ |
+| 2.5 | แยก/ปรับ ArticleMeta, ArticleRating | components ใหม่ | ✅ |
+| 2.6 | สร้าง composables: `useBookmarks`, `useSearch` | composables/ | ✅ |
+| 2.7 | SEO: meta tags, structured data, sitemap link | `nuxt.config.ts`, article page | ✅ |
 
 **Definition of Done Sprint 2**
-- [ ] แสดง comments, browser compat, code playground ในหน้าบทความ
-- [ ] Rate article ทำงานผ่าน API
-- [ ] Related articles แสดงจาก API (มีแล้ว — verify)
+- [x] แสดง comments, browser compat, code playground ในหน้าบทความ
+- [x] Rate article ทำงานผ่าน API
+- [x] Related articles แสดงจาก API (มีแล้ว — verify)
 
 ---
 
@@ -403,19 +403,19 @@
 | Sprint | ชื่อ | Tasks | เสร็จ | % | สถานะ |
 |--------|------|-------|------|---|--------|
 | S1 | Frontend Integration | 8 | 8 | 100% | ✅ เสร็จแล้ว |
-| S2 | Article Experience | 7 | 0 | 0% | ⬜ ยังไม่เริ่ม |
+| S2 | Article Experience | 7 | 7 | 100% | ✅ เสร็จแล้ว |
 | S3 | Glossary & Learning | 7 | 0 | 0% | ⬜ ยังไม่เริ่ม |
 | S4 | Admin Completion | 7 | 0 | 0% | ⬜ ยังไม่เริ่ม |
 | S5 | Backend & DevOps | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
 | S6 | Testing & Launch | 8 | 0 | 0% | ⬜ ยังไม่เริ่ม |
-| **รวม** | | **45** | **8** | **18%** | |
+| **รวม** | | **45** | **15** | **33%** | |
 
 **Milestones**
 
 | Milestone | Sprint ที่ต้องเสร็จ | สถานะ | เป้าหมาย |
 |-----------|-------------------|--------|----------|
 | M1 — MVP ใช้งานได้ | S1 | ✅ | Auth + หน้าเว็บดึง API จริง |
-| M2 — Beta Launch | S1 + S2 + S5 | ⬜ | บทความครบ + CI/Docker พร้อม |
+| M2 — Beta Launch | S1 + S2 + S5 | 🟡 | บทความครบ + CI/Docker พร้อม |
 | M3 — Feature Complete | S1–S4 | ⬜ | CMS + Community ครบ spec |
 | M4 — Production Launch | S1–S6 | ⬜ | Tests + Content + Security |
 
@@ -485,13 +485,13 @@
 | 1.6 | Auto-record reading history | S1 | FE | 2h | 1.1 | ✅ |
 | 1.7 | สร้าง forgot-password page | S1 | FE | 2h | — | ✅ |
 | 1.8 | สร้าง `layouts/auth.vue` | S1 | FE | 1h | — | ✅ |
-| 2.1 | Wire CommentSection ใน article | S2 | 🔴 | FE | 4h | 1.1 | ⬜ |
-| 2.2 | สร้าง BrowserCompat + แสดงผล | S2 | 🔴 | FE | 3h | — | ⬜ |
-| 2.3 | Wire CodePlayground | S2 | 🔴 | FE | 3h | — | ⬜ |
-| 2.4 | Article prev/next navigation | S2 | 🟡 | FE | 2h | — | ⬜ |
-| 2.5 | ArticleMeta + ArticleRating components | S2 | 🟡 | FE | 2h | — | ⬜ |
-| 2.6 | Composables useBookmarks, useSearch | S2 | 🟡 | FE | 3h | 1.5 | ⬜ |
-| 2.7 | SEO meta + structured data | S2 | 🟡 | FE | 3h | — | ⬜ |
+| 2.1 | Wire CommentSection ใน article | S2 | ✅ | FE | 4h | 1.1 | ✅ |
+| 2.2 | สร้าง BrowserCompat + แสดงผล | S2 | ✅ | FE | 3h | — | ✅ |
+| 2.3 | Wire CodePlayground | S2 | ✅ | FE | 3h | — | ✅ |
+| 2.4 | Article prev/next navigation | S2 | ✅ | FE | 2h | — | ✅ |
+| 2.5 | ArticleMeta + ArticleRating components | S2 | ✅ | FE | 2h | — | ✅ |
+| 2.6 | Composables useBookmarks, useSearch | S2 | ✅ | FE | 3h | 1.5 | ✅ |
+| 2.7 | SEO meta + structured data | S2 | ✅ | FE | 3h | — | ✅ |
 | 3.1 | Glossary index + term pages | S3 | 🔴 | FE | 4h | — | ⬜ |
 | 3.2 | Learning path enroll + progress | S3 | 🔴 | FE | 4h | 1.1 | ⬜ |
 | 3.3 | ProgressTracker component | S3 | 🟡 | FE | 2h | 3.2 | ⬜ |
@@ -591,12 +591,12 @@ flowchart TD
 | Sprint | Progress | Bar |
 |--------|----------|-----|
 | S1 Frontend Integration | 8 / 8 | `██████████` 100% |
-| S2 Article Experience | 0 / 7 | `░░░░░░░░░░` 0% |
+| S2 Article Experience | 7 / 7 | `██████████` 100% |
 | S3 Glossary & Learning | 0 / 7 | `░░░░░░░░░░` 0% |
 | S4 Admin Completion | 0 / 7 | `░░░░░░░░░░` 0% |
 | S5 Backend & DevOps | 0 / 8 | `░░░░░░░░░░` 0% |
 | S6 Testing & Launch | 0 / 8 | `░░░░░░░░░░` 0% |
-| **TOTAL** | **8 / 45** | `██░░░░░░░░` **18%** |
+| **TOTAL** | **15 / 45** | `████░░░░░░` **33%** |
 
 ### 4.2 Sprint 1 — Frontend Integration (8/8) ✅
 
@@ -616,20 +616,20 @@ flowchart TD
 
 ---
 
-### 4.3 Sprint 2 — Article Experience (0/7)
+### 4.3 Sprint 2 — Article Experience (7/7) ✅
 
-- [ ] **2.1** Wire CommentSection — `[...slug].vue` + `CommentSection.vue`
-- [ ] **2.2** BrowserCompat component *(new)* + article page
-- [ ] **2.3** Wire CodePlayground — article page
-- [ ] **2.4** ArticleNavigation prev/next *(new)*
-- [ ] **2.5** ArticleMeta + ArticleRating *(new)*
-- [ ] **2.6** Composables — `useBookmarks.ts`, `useSearch.ts` *(new)*
-- [ ] **2.7** SEO — meta tags, structured data, sitemap
+- [x] **2.1** Wire CommentSection — `[...slug].vue` + `CommentSection.vue`
+- [x] **2.2** BrowserCompat component *(new)* + article page
+- [x] **2.3** Wire CodePlayground — article page
+- [x] **2.4** ArticleNavigation prev/next *(new)*
+- [x] **2.5** ArticleMeta + ArticleRating *(new)*
+- [x] **2.6** Composables — `useBookmarks.ts`, `useSearch.ts` *(new)*
+- [x] **2.7** SEO — meta tags, structured data, sitemap
 
 **DoD Sprint 2**
-- [ ] Comments, browser compat, code playground แสดงในหน้าบทความ
-- [ ] Rate article ผ่าน API
-- [ ] Related articles verify จาก API
+- [x] Comments, browser compat, code playground แสดงในหน้าบทความ
+- [x] Rate article ผ่าน API
+- [x] Related articles verify จาก API
 
 ---
 

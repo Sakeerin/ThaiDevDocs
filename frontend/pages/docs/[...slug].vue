@@ -21,72 +21,8 @@
 
       <!-- Article Content -->
       <div v-else-if="article" class="container max-w-4xl mx-auto px-4 py-8 lg:py-12">
-        <!-- Breadcrumb -->
-        <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-          <NuxtLink to="/docs" class="hover:text-primary-600 dark:hover:text-primary-400">
-            เอกสาร
-          </NuxtLink>
-          <ChevronRightIcon class="w-4 h-4" />
-          <NuxtLink
-            v-if="article.topic?.category"
-            :to="`/docs/${article.topic.category.slug}`"
-            class="hover:text-primary-600 dark:hover:text-primary-400"
-          >
-            {{ article.topic.category.name }}
-          </NuxtLink>
-          <template v-if="article.topic?.category">
-            <ChevronRightIcon class="w-4 h-4" />
-          </template>
-          <NuxtLink
-            v-if="article.topic"
-            :to="`/docs/${article.topic.category?.slug}/${article.topic.slug}`"
-            class="hover:text-primary-600 dark:hover:text-primary-400"
-          >
-            {{ article.topic.name }}
-          </NuxtLink>
-        </nav>
+        <ArticleMeta :article="article" />
 
-        <!-- Article Header -->
-        <header class="mb-8">
-          <div class="flex flex-wrap items-center gap-2 mb-4">
-            <span class="badge-primary">{{ article.topic?.name }}</span>
-            <span :class="difficultyClass">{{ difficultyLabel }}</span>
-          </div>
-          <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            {{ article.title }}
-          </h1>
-          <p v-if="article.summary" class="text-lg text-gray-600 dark:text-gray-400 mb-6">
-            {{ article.summary }}
-          </p>
-          <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <span class="flex items-center gap-1">
-              <ClockIcon class="w-4 h-4" />
-              {{ article.reading_time }} นาที
-            </span>
-            <span v-if="article.view_count" class="flex items-center gap-1">
-              <EyeIcon class="w-4 h-4" />
-              {{ article.view_count }} วิว
-            </span>
-            <span v-if="article.published_at" class="flex items-center gap-1">
-              <CalendarIcon class="w-4 h-4" />
-              {{ formatDate(article.published_at) }}
-            </span>
-          </div>
-        </header>
-
-        <!-- Tags -->
-        <div v-if="article.tags?.length" class="flex flex-wrap gap-2 mb-8">
-          <NuxtLink
-            v-for="tag in article.tags"
-            :key="tag.id"
-            :to="`/tags/${tag.slug}`"
-            class="px-3 py-1 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            #{{ tag.name }}
-          </NuxtLink>
-        </div>
-
-        <!-- Article Content -->
         <ArticleContent :content="article.content_html || ''" />
 
         <!-- Code Examples -->
@@ -101,71 +37,32 @@
             <p v-if="example.description" class="text-gray-600 dark:text-gray-400">
               {{ example.description }}
             </p>
+            <CodePlayground
+              v-if="example.is_runnable"
+              :code="example.code"
+              :language="example.language"
+              :title="example.title"
+            />
             <CodeBlock
+              v-else
               :code="example.code"
               :language="example.language"
               :output="example.output"
               :output-type="example.output_type"
-              :is-runnable="example.is_runnable"
+              :is-runnable="false"
             />
           </div>
         </div>
 
-        <!-- Article Actions -->
-        <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <!-- Feedback -->
-            <div class="flex items-center gap-3 flex-wrap">
-              <template v-if="feedbackSubmitted">
-                <span class="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
-                  <CheckCircleIcon class="w-5 h-5" />
-                  ขอบคุณสำหรับความคิดเห็น!
-                </span>
-              </template>
-              <template v-else>
-                <span class="text-gray-600 dark:text-gray-400">บทความนี้มีประโยชน์หรือไม่?</span>
-                <button
-                  type="button"
-                  :disabled="isFeedbackLoading"
-                  class="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-500 hover:text-green-600 disabled:opacity-50"
-                  @click="submitFeedback(true)"
-                >
-                  <HandThumbUpIcon class="w-6 h-6" />
-                </button>
-                <button
-                  type="button"
-                  :disabled="isFeedbackLoading"
-                  class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 hover:text-red-600 disabled:opacity-50"
-                  @click="submitFeedback(false)"
-                >
-                  <HandThumbDownIcon class="w-6 h-6" />
-                </button>
-              </template>
-            </div>
+        <BrowserCompat :article-slug="article.slug" />
 
-            <!-- Actions -->
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                :disabled="isBookmarkLoading"
-                class="btn-secondary flex items-center gap-2 disabled:opacity-50"
-                @click="handleToggleBookmark"
-              >
-                <BookmarkIcon v-if="!isBookmarked" class="w-5 h-5" />
-                <BookmarkSolidIcon v-else class="w-5 h-5 text-primary-600" />
-                {{ isBookmarked ? 'บันทึกแล้ว' : 'บุ๊คมาร์ค' }}
-              </button>
-              <button
-                type="button"
-                class="btn-secondary flex items-center gap-2"
-                @click="shareArticle"
-              >
-                <ShareIcon class="w-5 h-5" />
-                แชร์
-              </button>
-            </div>
-          </div>
-        </div>
+        <ArticleRating :article="article" />
+
+        <ArticleNavigation
+          :prev="article.navigation?.prev"
+          :next="article.navigation?.next"
+          :topic="article.topic"
+        />
 
         <!-- Related Articles -->
         <div v-if="relatedArticles?.length" class="mt-12">
@@ -180,36 +77,29 @@
             />
           </div>
         </div>
+
+        <CommentSection
+          v-if="article.allow_comments"
+          :article-slug="article.slug"
+          :comments-count="article.comments_count"
+        />
       </div>
     </NuxtLayout>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  ChevronRightIcon,
-  ClockIcon,
-  EyeIcon,
-  CalendarIcon,
-  BookmarkIcon,
-  ShareIcon,
-  HandThumbUpIcon,
-  HandThumbDownIcon,
-  CheckCircleIcon,
-} from '@heroicons/vue/24/outline'
-import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/vue/24/solid'
 import { getArticleSlugFromRoute } from '~/utils/article'
+import { getArticlePath } from '~/utils/content'
 
 const route = useRoute()
 const config = useRuntimeConfig()
 const { isAuthenticated } = useAuth()
-const { $api } = useNuxtApp()
-const { isBookmarked, isLoading: isBookmarkLoading, loadStatus, toggle: toggleBookmark } = useBookmarks()
 const { startTracking, stopTracking } = useReadingHistory()
 
 const articleSlug = computed(() => getArticleSlugFromRoute(route.params.slug))
+const siteUrl = config.public.siteUrl || 'http://localhost:3000'
 
-// Fetch article data
 const { data: articleData, pending, error } = await useFetch<any>(
   () => `${config.public.apiBase}/articles/${articleSlug.value}`,
   {
@@ -221,7 +111,6 @@ const { data: articleData, pending, error } = await useFetch<any>(
 
 const article = computed(() => articleData.value?.article)
 
-// Fetch related articles
 const { data: relatedData } = await useFetch<any>(
   () => `${config.public.apiBase}/articles/${articleSlug.value}/related`,
   {
@@ -233,28 +122,66 @@ const { data: relatedData } = await useFetch<any>(
 
 const relatedArticles = computed(() => relatedData.value || [])
 
-// Page meta
-useHead({
-  title: () => article.value?.title || 'บทความ',
-  meta: [
-    { name: 'description', content: () => article.value?.summary || '' },
-    { property: 'og:title', content: () => article.value?.title || '' },
-    { property: 'og:description', content: () => article.value?.summary || '' },
-  ],
+const articleUrl = computed(() => {
+  if (!article.value) return siteUrl
+  return `${siteUrl}${getArticlePath(article.value)}`
 })
 
-// Feedback state
-const feedbackSubmitted = ref(false)
-const isFeedbackLoading = ref(false)
+const structuredData = computed(() => {
+  if (!article.value) return null
 
-// Load bookmark status + reading history when article is available
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: article.value.meta_title || article.value.title,
+    description: article.value.meta_description || article.value.summary,
+    author: article.value.author ? {
+      '@type': 'Person',
+      name: article.value.author.name,
+    } : undefined,
+    datePublished: article.value.published_at,
+    dateModified: article.value.updated_at,
+    url: articleUrl.value,
+    inLanguage: 'th',
+    proficiencyLevel: article.value.difficulty,
+  }
+})
+
+useHead(() => {
+  if (!article.value) {
+    return { title: 'บทความ' }
+  }
+
+  const title = article.value.meta_title || article.value.title
+  const description = article.value.meta_description || article.value.summary || ''
+  const canonical = article.value.canonical_url || articleUrl.value
+
+  return {
+    title,
+    link: [{ rel: 'canonical', href: canonical }],
+    meta: [
+      { name: 'description', content: description },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:type', content: 'article' },
+      { property: 'og:url', content: articleUrl.value },
+      { property: 'og:locale', content: 'th_TH' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'article:published_time', content: article.value.published_at || '' },
+      { name: 'article:modified_time', content: article.value.updated_at || '' },
+    ],
+    script: structuredData.value ? [{
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(structuredData.value),
+    }] : [],
+  }
+})
+
 watch(
   [article, isAuthenticated],
   ([currentArticle, authed]) => {
-    if (currentArticle?.slug) {
-      loadStatus(currentArticle.slug)
-    }
-
     if (currentArticle?.id && authed) {
       startTracking(currentArticle.id)
     } else {
@@ -267,74 +194,4 @@ watch(
 watch(articleSlug, () => {
   stopTracking()
 })
-
-// Computed
-const difficultyLabel = computed(() => {
-  const labels: Record<string, string> = {
-    beginner: 'เริ่มต้น',
-    intermediate: 'กลาง',
-    advanced: 'สูง',
-  }
-  return labels[article.value?.difficulty] || article.value?.difficulty
-})
-
-const difficultyClass = computed(() => {
-  const classes: Record<string, string> = {
-    beginner: 'difficulty-beginner',
-    intermediate: 'difficulty-intermediate',
-    advanced: 'difficulty-advanced',
-  }
-  return classes[article.value?.difficulty] || 'difficulty-beginner'
-})
-
-// Methods
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('th-TH', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
-}
-
-const submitFeedback = async (isHelpful: boolean) => {
-  if (!isAuthenticated.value) {
-    await navigateTo({ path: '/auth/login', query: { redirect: route.fullPath } })
-    return
-  }
-
-  if (!article.value?.slug || feedbackSubmitted.value || isFeedbackLoading.value) return
-
-  isFeedbackLoading.value = true
-
-  try {
-    await $api(`/articles/${article.value.slug}/feedback`, {
-      method: 'POST',
-      body: { is_helpful: isHelpful },
-    })
-    feedbackSubmitted.value = true
-  } catch {
-    // Error toast could be added later
-  } finally {
-    isFeedbackLoading.value = false
-  }
-}
-
-const handleToggleBookmark = async () => {
-  if (!article.value) return
-  await toggleBookmark({ id: article.value.id, slug: article.value.slug })
-}
-
-const shareArticle = async () => {
-  if (navigator.share) {
-    await navigator.share({
-      title: article.value?.title,
-      text: article.value?.summary,
-      url: window.location.href,
-    })
-  } else {
-    // Fallback: copy to clipboard
-    await navigator.clipboard.writeText(window.location.href)
-    alert('คัดลอกลิงก์แล้ว!')
-  }
-}
 </script>
